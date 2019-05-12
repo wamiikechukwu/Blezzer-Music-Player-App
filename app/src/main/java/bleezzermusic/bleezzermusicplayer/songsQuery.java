@@ -1,31 +1,30 @@
 package bleezzermusic.bleezzermusicplayer;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 
 public class songsQuery implements Serializable {
 
-    private final LinkedList<songsQuery> songList = new LinkedList<>();
-    private long id;
+    private long data;
     private String artist;
     private String title;
     private String genre;
     private String album;
 
-    public songsQuery(long id, String artist, String title, String genre, String album) {
-        this.id = id;
+    public songsQuery(long data, String artist, String title, String genre, String album) {
+        this.data = data;
         this.artist = artist;
         this.title = title;
         this.genre = genre;
         this.album = album;
     }
 
-    public long getId() {
-        return id;
+    //Getter and Setters are used to effectively protect the data in the variable declared above
+    public long getData() {
+        return data;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setData(long data) {
+        this.data = data;
     }
 
     public String getArtist() {
@@ -50,5 +49,13 @@ public class songsQuery implements Serializable {
 
     public void setGenre(String genre) {
         this.genre = genre;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
     }
 }
