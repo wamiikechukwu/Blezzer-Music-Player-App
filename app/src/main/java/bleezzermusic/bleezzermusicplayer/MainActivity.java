@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
                 //Saving to the songs to audio List
 
-                audioList.add(new MediaStore.Audio(data, artist, title, album));
             }
 
         }
