@@ -2,27 +2,25 @@ package bleezzermusic.bleezzermusicplayer;
 
 public class songsQuery {
 
-    private long data;
+    private long id;
     private String artist;
     private String title;
-    private String genre;
     private String album;
 
-    public songsQuery(long data, String artist, String title, String genre, String album) {
-        this.data = data;
+    public songsQuery(long id, String artist, String title, String album) {
+        this.id = id;
         this.artist = artist;
         this.title = title;
-        this.genre = genre;
         this.album = album;
     }
 
-    //Getter and Setters are used to effectively protect the data in the variable declared above
-    public long getData() {
-        return data;
+    //Getter and Setters are used to effectively protect the id in the variable declared above
+    public long getId() {
+        return id;
     }
 
-    public void setData(long data) {
-        this.data = data;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getArtist() {
@@ -39,14 +37,6 @@ public class songsQuery {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
     }
 
     public String getAlbum() {

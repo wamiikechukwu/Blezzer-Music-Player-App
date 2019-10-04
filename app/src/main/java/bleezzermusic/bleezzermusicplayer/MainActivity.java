@@ -32,15 +32,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getSongsFromDevice() {
-        ContentResolver contentResolver = getContentResolver();
 
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        //CREATED A CONTENT RESOLVER INSTANCE, TO RETRIEVE THE URI FOR EXTERNAL MUSIC FILES
+        ContentResolver musicResolver = getContentResolver();
+
+        //CREATED A CURSOR INSTANCE USING THE CONTENT RESOLVER INSTANCE TO QUERY THE MUSIC FILES
+        Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
+
+        if (musicCursor != null && musicCursor.moveToFirst()) {
+            int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+            int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
+
+            do {
+                long songId = musicCursor.getLong(idColumn);
+                String songTitle = musicCursor.getString(titleColumn);
+                String songArtist = musicCursor.getString(artistColumn);
+                String songAlbum = musicCursor.getString(albumColumn);
+
+                songArrayList.add(new songsQuery())
+            }
+            while (musicCursor.moveToNext());
+        }
+
 
         String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
 
         String sortOrder = MediaStore.Audio.Media.TITLE + "ASC";
 
-        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
 
         if (cursor != null && cursor.getCount() > 0) {
