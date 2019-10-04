@@ -52,36 +52,9 @@ public class MainActivity extends AppCompatActivity {
                 String songArtist = musicCursor.getString(artistColumn);
                 String songAlbum = musicCursor.getString(albumColumn);
 
-                songArrayList.add(new songsQuery())
+                songArrayList.add(new songsQuery(songId, songTitle, songArtist, songAlbum));
             }
             while (musicCursor.moveToNext());
         }
-
-
-        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-
-        String sortOrder = MediaStore.Audio.Media.TITLE + "ASC";
-
-
-
-        if (cursor != null && cursor.getCount() > 0) {
-            audioList = new ArrayList<>();
-
-            while (cursor.moveToNext()) {
-                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media
-                        .ARTIST));
-                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media
-                        .TITLE));
-                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media
-                        .ALBUM));
-
-                //Saving to the songs to audio List
-
-            }
-
-        }
-
-        cursor.close();
     }
 }
