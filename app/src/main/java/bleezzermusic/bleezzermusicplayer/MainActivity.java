@@ -6,21 +6,32 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<MediaStore.Audio> audioList;
+    //THE SONG WILL BE STORED IN AN ARRAYLIST
+    ArrayList<songsQuery> songArrayList;
+
+    //CREATED A GLOBAL VARIABLE OF THE  LISTVIEW
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //GETTING THE INSTANCE OF THE LISTVIEW ID
+        listView = findViewById(R.id.song_list);
+
+        //INSTANTIATE THE  ARRAYLIST
+        songArrayList = new ArrayList<songsQuery>();
     }
 
-    private void loadAudio() {
+    private void getSongsFromDevice() {
         ContentResolver contentResolver = getContentResolver();
 
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;

@@ -1,8 +1,6 @@
 package bleezzermusic.bleezzermusicplayer;
 
-import java.io.Serializable;
-
-public class songsQuery implements Serializable {
+public class songsQuery {
 
     private long data;
     private String artist;
