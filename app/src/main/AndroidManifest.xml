@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="bleezzermusic.bleezzermusicplayer.MusicService" />
+        <service android:name=".MusicService"></service>
     </application>
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
