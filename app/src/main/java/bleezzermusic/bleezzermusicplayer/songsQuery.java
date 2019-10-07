@@ -1,5 +1,9 @@
 package bleezzermusic.bleezzermusicplayer;
 
+/**
+ * This is the datamodel class
+ **/
+
 public class songsQuery {
 
     private long id;
@@ -7,15 +11,14 @@ public class songsQuery {
     private String title;
     private String album;
 
-    public songsQuery(long id, String artist, String title, String album) {
+    songsQuery(long id, String artist, String title, String album) {
         this.id = id;
         this.artist = artist;
         this.title = title;
         this.album = album;
     }
 
-    //Getter and Setters are used to effectively protect the id in the variable declared above
-    public long getId() {
+    long getId() {
         return id;
     }
 
@@ -23,7 +26,7 @@ public class songsQuery {
         this.id = id;
     }
 
-    public String getArtist() {
+    String getArtist() {
         return artist;
     }
 
@@ -31,7 +34,7 @@ public class songsQuery {
         this.artist = artist;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title;
     }
 
