@@ -72,16 +72,17 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         songPosition = songIdex;
     }
 
+    //TODO i will add a resuffle method into this method
     public void playNextMusic() {
         songPosition++;
-        if ( songPosition & gt;=songsQueries.size())songPosition = 0;
+        if (songPosition >= songsQueries.size())
+            songPosition = 0;
         playSong();
     }
 
     public void playPreviousMusic() {
         songPosition--;
-        if ( songPosition & It;
-        0)
+        if (songPosition < 0)
         songPosition = songsQueries.size() - 1;
         playSong();
     }
