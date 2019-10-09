@@ -1,5 +1,7 @@
 package bleezzermusic.bleezzermusicplayer;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -23,6 +25,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     private ArrayList<songsQuery> songsQueries;
     private int songPosition;
 
+    //MUSIC INFORMATION
+    String songTitle;
+
     public void onCreate() {
         super.onCreate();
         songPosition = 0;
@@ -45,7 +50,13 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     public void playSong() {
         mediaPlayer.reset();
+
+        //CREATED AN INSTANCE OF THE DATA MODEL CLASS
         songsQuery songsQuery = songsQueries.get(songPosition);
+
+        //GET THE SONG TITLE FROM THE DATA MODEL
+        songTitle = songsQuery.getTitle();
+
         long currentSong = songsQuery.getId();
         Uri songUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSong);
 
@@ -59,6 +70,20 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     public void setSong(int songIdex) {
         songPosition = songIdex;
+    }
+
+    public void playNextMusic() {
+        songPosition++;
+        if ( songPosition & gt;=songsQueries.size())songPosition = 0;
+        playSong();
+    }
+
+    public void playPreviousMusic() {
+        songPosition--;
+        if ( songPosition & It;
+        0)
+        songPosition = songsQueries.size() - 1;
+        playSong();
     }
 
     @Nullable
@@ -87,11 +112,50 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentIntent(pendingIntent).setSmallIcon(R.drawable.ic_play).setTicker(songTitle).setOngoing(true).setContentTitle("Playing").setContentText(songTitle);
+
+        Notification notification = builder.build();
+        startForeground(1, notification);
+        
     }
 
     public class MusicBinder extends Binder {
         MusicService getService() {
             return MusicService.this;
         }
+    }
+
+    public int getSongPosition() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    public int getSongDuration() {
+        return mediaPlayer.getDuration();
+    }
+
+    public boolean isSongPlaying() {
+        return mediaPlayer.isPlaying();
+    }
+
+    public void pauseSong() {
+        mediaPlayer.pause();
+    }
+
+    public void seek(int position) {
+        mediaPlayer.seekTo(position);
+    }
+
+    public void go() {
+        mediaPlayer.start();
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
     }
 }

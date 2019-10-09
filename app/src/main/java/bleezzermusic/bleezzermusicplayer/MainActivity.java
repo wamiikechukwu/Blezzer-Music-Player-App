@@ -16,13 +16,14 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.MediaController;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MediaController.MediaPlayerControl {
 
     //THE SONG WILL BE STORED IN THIS ARRAYLIST
     ArrayList<songsQuery> songArrayList;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private Intent playIntent;
     private boolean musicBound = false;
+    private MusicController musicController;
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -79,7 +81,10 @@ public class MainActivity extends AppCompatActivity {
         });
         songAdapter songAdapter = new songAdapter(this, songArrayList);
         listView.setAdapter(songAdapter);
+
+        setMusicController();
     }
+
 
     @Override
     protected void onStart() {
@@ -113,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 String songAlbum = musicCursor.getString(albumColumn);
 
                 songArrayList.add(new songsQuery(songId, songTitle, songArtist, songAlbum));
-            }
+            }                                              
             while (musicCursor.moveToNext());
         }
     }
@@ -121,5 +126,104 @@ public class MainActivity extends AppCompatActivity {
     public void songSelected(View view) {
         musicService.setSong(Integer.parseInt(view.getTag().toString()));
         musicService.playSong();
+    }
+
+    private void setMusicController() {
+        musicController = new MusicController(this);
+
+        musicController.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNextMusic();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPreviousMusic();
+            }
+        });
+
+        musicController.setMediaPlayer(this);
+        musicController.setAnchorView(findViewById(R.id.song_list));
+        musicController.setEnabled(true);
+    }
+
+    public void playNextMusic() {
+        MusicService.playNextMusic();
+        musicController.show();
+    }
+
+    public void playPreviousMusic() {
+        MusicService.playPreviousMusic();
+        musicController.show();
+    }
+
+
+    @Override
+    public void start() {
+        musicService.go();
+    }
+
+    @Override
+    public void pause() {
+        musicService.pauseSong();
+    }
+
+    @Override
+    public int getDuration() {
+        if ( musicService != null & amp;&amp;
+        musicBound & amp;&amp;
+        musicService.isSongPlaying())
+        return musicService.getSongDuration();
+        else
+        return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if ( musicService != null & amp;&amp;
+        musicBound & amp;&amp;
+        musicService.isSongPlaying())
+        return musicService.getSongPosition();
+        else
+        return 0;
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        musicService.seek(pos);
+    }
+
+    @Override
+    public boolean isPlaying() {
+        if ( musicService != null & amp;&amp;
+        musicBound)
+        return musicService.isSongPlaying();
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
     }
 }
