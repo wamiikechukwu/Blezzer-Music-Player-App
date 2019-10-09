@@ -33,6 +33,10 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     private Intent playIntent;
     private boolean musicBound = false;
     private MusicController musicController;
+
+    private boolean pause = false;
+    private boolean pausePlayBack = false;
+    
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -171,9 +175,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     @Override
     public int getDuration() {
-        if ( musicService != null & amp;&amp;
-        musicBound & amp;&amp;
-        musicService.isSongPlaying())
+        if (musicService != null && musicBound && musicService.isSongPlaying())
         return musicService.getSongDuration();
         else
         return 0;
@@ -181,9 +183,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     @Override
     public int getCurrentPosition() {
-        if ( musicService != null & amp;&amp;
-        musicBound & amp;&amp;
-        musicService.isSongPlaying())
+        if (musicService != null && musicBound && musicService.isSongPlaying())
         return musicService.getSongPosition();
         else
         return 0;
@@ -196,8 +196,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     @Override
     public boolean isPlaying() {
-        if ( musicService != null & amp;&amp;
-        musicBound)
+        if (musicService != null && musicBound)
         return musicService.isSongPlaying();
         return false;
     }
@@ -225,5 +224,26 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     @Override
     public int getAudioSessionId() {
         return 0;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pause = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (pause) {
+            setMusicController();
+            pause = false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        musicController.hide();
     }
 }
