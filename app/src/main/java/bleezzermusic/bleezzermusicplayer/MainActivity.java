@@ -153,12 +153,21 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     }
 
     public void playNextMusic() {
-        MusicService.playNextMusic();
+        MusicService MS = new MusicService();
+        MS.playNextMusic();
+        if (pausePlayBack) {
+            setMusicController();
+            pausePlayBack = false;
+        }
         musicController.show();
     }
 
     public void playPreviousMusic() {
-        MusicService.playPreviousMusic();
+        MusicService MS = new MusicService();
+        MS.playPreviousMusic();
+        if (pausePlayBack) {
+            pausePlayBack = false;
+        }
         musicController.show();
     }
 
