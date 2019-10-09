@@ -15,7 +15,8 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController;
@@ -68,13 +69,9 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         setContentView(R.layout.activity_main);
 
         //GET THE ACTION BAR AND CUSTOMIZE IT
-        try {
-            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setCustomView(R.layout.action_bar_layout);
-            getSupportActionBar().setElevation(30);
-        } catch (Exception e) {
-            Log.e(LOG, "error in getSupportActionBar().setDisplayOption");
-        }
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.action_bar_layout);
+        getSupportActionBar().setElevation(30);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -103,6 +100,12 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         setMusicController();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.option_menu, menu);
+        return true;
+    }
 
     @Override
     protected void onStart() {
