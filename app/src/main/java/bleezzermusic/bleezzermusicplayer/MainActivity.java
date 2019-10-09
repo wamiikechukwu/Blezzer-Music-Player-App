@@ -13,7 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController;
@@ -36,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     private boolean pause = false;
     private boolean pausePlayBack = false;
+
+    //LOG TITLE TO BE USED CHECK FOR ANY ERRORS IN LOGCAT
+    public static final String LOG = "LOG";
     
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
@@ -61,6 +66,15 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //GET THE ACTION BAR AND CUSTOMIZE IT
+        try {
+            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            getSupportActionBar().setCustomView(R.layout.action_bar_layout);
+            getSupportActionBar().setElevation(30);
+        } catch (Exception e) {
+            Log.e(LOG, "error in getSupportActionBar().setDisplayOption");
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
