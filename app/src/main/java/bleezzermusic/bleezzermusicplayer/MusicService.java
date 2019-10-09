@@ -102,11 +102,16 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        //TODO we need to make sure the grater sign is the right once from the website
+        if (mediaPlayer.getCurrentPosition() >= 0) {
+            mp.reset();
+            playNextMusic();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.reset();
         return false;
     }
 

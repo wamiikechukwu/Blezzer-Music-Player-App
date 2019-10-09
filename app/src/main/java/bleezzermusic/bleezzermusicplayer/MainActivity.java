@@ -130,6 +130,11 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     public void songSelected(View view) {
         musicService.setSong(Integer.parseInt(view.getTag().toString()));
         musicService.playSong();
+        if (pausePlayBack) {
+            setMusicController();
+            pausePlayBack = false;
+        }
+        musicController.show(0);
     }
 
     private void setMusicController() {
@@ -179,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     @Override
     public void pause() {
+        pausePlayBack = true;
         musicService.pauseSong();
     }
 
