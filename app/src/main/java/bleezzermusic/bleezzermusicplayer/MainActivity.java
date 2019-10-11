@@ -1,6 +1,7 @@
 package bleezzermusic.bleezzermusicplayer;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController;
+import android.widget.SearchView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,10 +102,19 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         setMusicController();
     }
 
+    //INFLATING THE MENU INTO THE ACTION BAR
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
+        //ADDING THE SEARCH VIEW
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.option_menu, menu);
+
+        //ASSOCIATE THE SEARCHABLE CONFIGURATION WITH THE SEARCHVIEW
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search_view).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
         return true;
     }
 
