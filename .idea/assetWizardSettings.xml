@@ -23,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Users/USER%20Pc/Desktop/IYKE/RAW%20FILE/Android%20Studio%203.3.5/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_info_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/C:/Users/USER%20Pc/Desktop/IYKE/RAW%20FILE/Android%20Studio%203.3.5/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/social/ic_share_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -34,7 +34,7 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ff0006" />
-                            <entry key="outputName" value="ic_about" />
+                            <entry key="outputName" value="ic_share" />
                             <entry key="sourceFile" value="C:\Users\USER Pc" />
                           </map>
                         </option>

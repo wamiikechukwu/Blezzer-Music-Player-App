@@ -125,15 +125,15 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 int item = menuItem.getItemId();
                 switch (item) {
-                    case R.id.account:
+                    case R.id.home:
                         Toast.makeText(getApplicationContext(), "Account Click", Toast.LENGTH_SHORT).show();
                         break;
 
-                    case R.id.settings:
+                    case R.id.albums:
                         Toast.makeText(getApplicationContext(), "Setting Click", Toast.LENGTH_SHORT).show();
                         break;
 
-                    case R.id.mycart:
+                    case R.id.songs:
                         Toast.makeText(getApplicationContext(), "My cart Click", Toast.LENGTH_SHORT).show();
                         break;
 
