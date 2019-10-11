@@ -24,26 +24,26 @@
     <item
         android:id="@+id/folder"
         android:icon="@drawable/ic_folder"
-        android:title="Folders" />
+        android:title="@string/folders" />
 
     <item
         android:id="@+id/playlist"
         android:icon="@drawable/ic_playlist"
-        android:title="Play List" />
+        android:title="@string/play_list" />
 
     <item
         android:id="@+id/equalizer"
         android:icon="@drawable/ic_equalizer"
-        android:title="Equalizer" />
+        android:title="@string/equalizer" />
 
     <item
         android:id="@+id/setting"
         android:icon="@drawable/ic_settings"
-        android:title="Setting" />
+        android:title="@string/setting" />
 
     <item
         android:id="@+id/about"
         android:icon="@drawable/ic_about"
-        android:title="About" />
+        android:title="@string/about" />
 
 </menu>
