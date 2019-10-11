@@ -4,4 +4,7 @@
     <string name="Open">Open navigation drawer</string>
     <string name="Close">Close navigation drawer</string>
     <string name="home">Home</string>
+    <string name="albums">Albums</string>
+    <string name="songs">Songs</string>
+    <string name="artist">Artist</string>
 </resources>

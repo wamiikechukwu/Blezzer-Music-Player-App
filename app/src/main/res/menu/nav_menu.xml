@@ -9,26 +9,41 @@
     <item
         android:id="@+id/Albums"
         android:icon="@drawable/ic_album"
-        android:title="Albums" />
+        android:title="@string/albums" />
 
     <item
-        android:id="@+id/mycart"
-        android:icon="@drawable/ic_pause"
-        android:title="My Cart" />
+        android:id="@+id/Songs"
+        android:icon="@drawable/ic_song"
+        android:title="@string/songs" />
 
     <item
-        android:id="@+id/account"
-        android:icon="@drawable/ic_stop"
-        android:title="My Account" />
+        android:id="@+id/artist"
+        android:icon="@drawable/ic_artist"
+        android:title="@string/artist" />
 
     <item
-        android:id="@+id/settings"
-        android:icon="@drawable/ic_shuffle"
-        android:title="Settings" />
+        android:id="@+id/folder"
+        android:icon="@drawable/ic_folder"
+        android:title="Folders" />
 
     <item
-        android:id="@+id/mycart"
-        android:icon="@drawable/ic_pause"
-        android:title="My Cart" />
+        android:id="@+id/playlist"
+        android:icon="@drawable/ic_playlist"
+        android:title="Play List" />
+
+    <item
+        android:id="@+id/equalizer"
+        android:icon="@drawable/ic_equalizer"
+        android:title="Equalizer" />
+
+    <item
+        android:id="@+id/setting"
+        android:icon="@drawable/ic_settings"
+        android:title="Setting" />
+
+    <item
+        android:id="@+id/about"
+        android:icon="@drawable/ic_about"
+        android:title="About" />
 
 </menu>
