@@ -3,4 +3,5 @@
     <string name="search">search</string>
     <string name="Open">Open navigation drawer</string>
     <string name="Close">Close navigation drawer</string>
+    <string name="home">Home</string>
 </resources>

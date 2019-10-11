@@ -2,6 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home" />
+
+    <item
+        android:id="@+id/Albums"
+        android:icon="@drawable/ic_album"
+        android:title="Albums" />
+
+    <item
+        android:id="@+id/mycart"
+        android:icon="@drawable/ic_pause"
+        android:title="My Cart" />
+
+    <item
         android:id="@+id/account"
         android:icon="@drawable/ic_stop"
         android:title="My Account" />
