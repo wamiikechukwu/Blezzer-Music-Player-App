@@ -1,21 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    <TextView
-        android:id="@+id/textView"
+    <ListView
+        android:id="@+id/song_list"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="130dp"
-        android:layout_marginTop="200dp"
-        android:text="Main"
-        android:textSize="50sp" />
+        android:layout_height="wrap_content" />
 
 
-</android.support.v4.widget.DrawerLayout>
-
+</RelativeLayout>

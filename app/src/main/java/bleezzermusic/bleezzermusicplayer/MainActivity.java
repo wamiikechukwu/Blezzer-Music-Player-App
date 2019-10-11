@@ -14,14 +14,20 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +50,11 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     //LOG TITLE TO BE USED CHECK FOR ANY ERRORS IN LOGCAT
     public static final String LOG = "LOG";
+
+    //INSTANCE VARIABLE FOR THE NAVIGATION DRAWER
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
+    private DrawerLayout drawerLayout;
     
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
@@ -100,6 +111,46 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         listView.setAdapter(songAdapter);
 
         setMusicController();
+
+        // NAVIGATION DRAWER
+        drawerLayout = findViewById(R.id.drawer_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.Open, R.string.Close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        navigationView = findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                int item = menuItem.getItemId();
+                switch (item) {
+                    case R.id.account:
+                        Toast.makeText(getApplicationContext(), "Account Click", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case R.id.settings:
+                        Toast.makeText(getApplicationContext(), "Setting Click", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    case R.id.mycart:
+                        Toast.makeText(getApplicationContext(), "My cart Click", Toast.LENGTH_SHORT).show();
+                        break;
+
+                    default:
+                        return true;
+                }
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (actionBarDrawerToggle.onOptionsItemSelected(item)) return true;
+
+        return super.onOptionsItemSelected(item);
     }
 
     //INFLATING THE MENU INTO THE ACTION BAR
@@ -117,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
         return true;
     }
+
 
     @Override
     protected void onStart() {
