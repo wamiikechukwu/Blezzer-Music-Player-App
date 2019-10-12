@@ -10,7 +10,7 @@
     <string name="about">About</string>
     <string name="setting">Setting</string>
     <string name="equalizer">Equalizer</string>
-    <string name="play_list">Play List</string>
+    <string name="play_list">Playlist</string>
     <string name="folders">Folders</string>
     <string name="share">Share</string>
 </resources>
