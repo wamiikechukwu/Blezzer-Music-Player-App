@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 public class songAdapter extends RecyclerView.Adapter<songAdapter.viewHolder> {
@@ -32,7 +34,9 @@ public class songAdapter extends RecyclerView.Adapter<songAdapter.viewHolder> {
     @Override
     public void onBindViewHolder(@NonNull songAdapter.viewHolder viewHolder, int i) {
         DataModel dataModel = mDataModel.get(i);
-        
+        Glide.with(context).load(dataModel.getImage()).into(viewHolder.songImageView);
+        viewHolder.songTitleText.setText(dataModel.getTitle());
+        viewHolder.songArtistText.setText(dataModel.getArtist());
     }
 
     @Override
