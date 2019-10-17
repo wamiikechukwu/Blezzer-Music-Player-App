@@ -12,14 +12,16 @@ public class DataModel {
     private String album;
     private String folder;
     private String genre;
+    private String image;
 
-    DataModel(long id, String artist, String title, String album, String folder, String genre) {
+    DataModel(long id, String artist, String title, String album, String folder, String genre, String image) {
         this.id = id;
         this.artist = artist;
         this.title = title;
         this.album = album;
         this.folder = folder;
         this.genre = genre;
+        this.image = image;
     }
 
     long getId() {
@@ -60,5 +62,21 @@ public class DataModel {
 
     public void setFolder(String folder) {
         this.folder = folder;
+    }
+
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }
