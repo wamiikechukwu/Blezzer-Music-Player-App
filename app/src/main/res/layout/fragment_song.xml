@@ -5,9 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".songFragment">
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Hello Fragment" />
+        android:scrollbarSize="5dp"
+        android:scrollbars="vertical" />
 
 </FrameLayout>

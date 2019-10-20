@@ -1,60 +1,59 @@
 package bleezzermusic.bleezzermusicplayer;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.BaseAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
-public class songAdapter extends RecyclerView.Adapter<songAdapter.viewHolder> {
+public class songAdapter extends BaseAdapter {
 
-    private ArrayList<DataModel> mDataModel;
-    private Context context;
+    private ArrayList<songsQuery> songs;
+    private LayoutInflater layoutInflater;
 
-    public songAdapter(ArrayList<DataModel> mDataModel, Context context) {
-        this.mDataModel = mDataModel;
-        this.context = context;
-    }
-
-    @NonNull
-    @Override
-    public songAdapter.viewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(context).inflate(R.layout.music_layout,
-                viewGroup, false);
-        return new viewHolder(view);
+    public songAdapter(Context context, ArrayList<songsQuery> songs) {
+        this.songs = songs;
+        this.layoutInflater = LayoutInflater.from(context);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull songAdapter.viewHolder viewHolder, int i) {
-        DataModel dataModel = mDataModel.get(i);
-        Glide.with(context).load(dataModel.getImage()).into(viewHolder.songImageView);
-        viewHolder.songTitleText.setText(dataModel.getTitle());
-        viewHolder.songArtistText.setText(dataModel.getArtist());
+    public int getCount() {
+        return songs.size();
     }
 
     @Override
-    public int getItemCount() {
+    public Object getItem(int position) {
+        return null;
+    }
+
+    @Override
+    public long getItemId(int position) {
         return 0;
     }
 
-    public class viewHolder extends RecyclerView.ViewHolder {
-        public ImageView songImageView;
-        public TextView songTitleText;
-        public TextView songArtistText;
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
 
-        public viewHolder(@NonNull View itemView) {
-            super(itemView);
+        //GET THE LAYOUT THAT WILL BE USED IN FORMING THE SONG LAYOUT
+        RelativeLayout relativeLayout = (RelativeLayout) layoutInflater.inflate(R.layout.music_layout, parent, false);
 
-            songImageView = itemView.findViewById(R.id.song_image);
-            songTitleText = itemView.findViewById(R.id.song_title);
-            songArtistText = itemView.findViewById(R.id.song_artist);
-        }
+        //THEN GET THE INSTANCE OF THE TWO VIEWS; THAT IS THE SONG NAME AND SONG ARTIST
+        TextView songName = relativeLayout.findViewById(R.id.song_name);
+        TextView songArtist = relativeLayout.findViewById(R.id.song_artist);
+
+        // GET THE SONG POSITION, SO THAT WE CAN KNOW WHICH OF THE  SONG WAS CLICKED
+        songsQuery getCurrentSongs = songs.get(position);
+
+        //SET THE SONGS INTO THE TEXT VIEW, USING SELECTED MATERIAL
+        songName.setText(getCurrentSongs.getArtist());
+        songArtist.setText(getCurrentSongs.getTitle());
+
+        relativeLayout.setTag(position);
+
+        return relativeLayout;
     }
 }

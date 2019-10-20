@@ -22,7 +22,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     private final IBinder musicBind = new MusicBinder();
     private MediaPlayer mediaPlayer;
-    private ArrayList<DataModel> songsQueries;
+    private ArrayList<songsQuery> songsQueries;
     private int songPosition;
 
     //MUSIC INFORMATION
@@ -36,7 +36,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         initializeMusicPlayer();
     }
 
-    public void setList(ArrayList<DataModel> thesongs) {
+    public void setList(ArrayList<songsQuery> thesongs) {
         songsQueries = thesongs;
     }
 
@@ -52,7 +52,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mediaPlayer.reset();
 
         //CREATED AN INSTANCE OF THE DATA MODEL CLASS
-        DataModel songsQuery = songsQueries.get(songPosition);
+        songsQuery songsQuery = songsQueries.get(songPosition);
 
         //GET THE SONG TITLE FROM THE DATA MODEL
         songTitle = songsQuery.getTitle();
