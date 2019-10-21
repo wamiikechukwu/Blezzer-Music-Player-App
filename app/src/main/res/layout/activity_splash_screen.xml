@@ -17,9 +17,10 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="80dp"
-        android:text="Bleezzer Play"
+        android:text="Bleezzer"
         android:textColor="#F000"
-        android:textSize="22sp"
+        android:textSize="27sp"
+        android:textStyle="bold"
         android:typeface="monospace" />
 
 </RelativeLayout>
