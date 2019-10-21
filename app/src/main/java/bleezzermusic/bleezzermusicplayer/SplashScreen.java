@@ -8,14 +8,12 @@ import android.view.WindowManager;
 
 public class SplashScreen extends AppCompatActivity {
 
+    //TOTAL SECONDS TO DISPLAY THE SPLASH SCREEN
     int secondsDelayed = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //HIDE THE TITLE BAR IN THE PHONE
-        // requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         //HIDE THE ACTION BAR FOR THE SPLASH SCREEN
         getSupportActionBar().hide();
@@ -25,12 +23,13 @@ public class SplashScreen extends AppCompatActivity {
 
         setContentView(R.layout.activity_splash_screen);
 
-
+        //OPEN ANOTHER THREAD
         Handler handler = new Handler();
 
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                //SHPW THE MAIN ACTIVITY AFTER THE SPLASH SCREEN
                 startActivity(new Intent(SplashScreen.this, MainActivity.class));
                 finish();
             }
