@@ -3,14 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <ImageView
         android:id="@+id/actionBarTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:text="BLEEZER"
-        android:textColor="#FFF"
-        android:textSize="19sp"
-        android:typeface="monospace" />
+        android:src="@drawable/bleezer_logo" />
 </RelativeLayout>

@@ -6,10 +6,10 @@
     tools:context=".SplashScreen">
 
     <ImageView
-        android:layout_width="95dp"
-        android:layout_height="95dp"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
         android:layout_centerInParent="true"
-        android:src="@drawable/bleezer" />
+        android:src="@drawable/bleezer_logo" />
 
     <TextView
         android:layout_width="wrap_content"
