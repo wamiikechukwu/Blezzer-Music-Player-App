@@ -17,7 +17,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="80dp"
-        android:text="Bleezzer"
+        android:text="Bleezzer Music"
         android:textColor="#F000"
         android:textSize="27sp"
         android:textStyle="bold"
