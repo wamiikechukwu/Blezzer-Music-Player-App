@@ -1,59 +1,62 @@
 package bleezzermusic.bleezzermusicplayer;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.RelativeLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class songAdapter extends BaseAdapter {
+public class songAdapter extends RecyclerView.Adapter<songAdapter.viewHolder> {
 
     private ArrayList<songsQuery> songs;
-    private LayoutInflater layoutInflater;
+    private Context context;
 
     public songAdapter(Context context, ArrayList<songsQuery> songs) {
+        this.context = context;
         this.songs = songs;
-        this.layoutInflater = LayoutInflater.from(context);
+    }
+
+    @NonNull
+    @Override
+    public songAdapter.viewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        View view =
+                LayoutInflater.from(context).inflate(R.layout.music_layout,
+                        viewGroup, false);
+        return new viewHolder(view);
     }
 
     @Override
-    public int getCount() {
+    public void onBindViewHolder(@NonNull songAdapter.viewHolder viewHolder, int i) {
+        songsQuery songsQuery = songs.get(i);
+
+        viewHolder.song_name.setText(songsQuery.getTitle());
+        viewHolder.song_artist.setText(songsQuery.getArtist());
+        //Glide.with(context).load(songsQuery.***).into(viewHolder.mImageView);
+
+    }
+
+    @Override
+    public int getItemCount() {
         return songs.size();
     }
 
-    @Override
-    public Object getItem(int position) {
-        return null;
-    }
+    public class viewHolder extends RecyclerView.ViewHolder {
 
-    @Override
-    public long getItemId(int position) {
-        return 0;
-    }
+        ImageView song_image;
+        TextView song_name;
+        TextView song_artist;
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+        public viewHolder(@NonNull View itemView) {
+            super(itemView);
 
-        //GET THE LAYOUT THAT WILL BE USED IN FORMING THE SONG LAYOUT
-        RelativeLayout relativeLayout = (RelativeLayout) layoutInflater.inflate(R.layout.music_layout, parent, false);
-
-        //THEN GET THE INSTANCE OF THE TWO VIEWS; THAT IS THE SONG NAME AND SONG ARTIST
-        TextView songName = relativeLayout.findViewById(R.id.song_name);
-        TextView songArtist = relativeLayout.findViewById(R.id.song_artist);
-
-        // GET THE SONG POSITION, SO THAT WE CAN KNOW WHICH OF THE  SONG WAS CLICKED
-        songsQuery getCurrentSongs = songs.get(position);
-
-        //SET THE SONGS INTO THE TEXT VIEW, USING SELECTED MATERIAL
-        songName.setText(getCurrentSongs.getArtist());
-        songArtist.setText(getCurrentSongs.getTitle());
-
-        relativeLayout.setTag(position);
-
-        return relativeLayout;
+            song_image = itemView.findViewById(R.id.song_image);
+            song_name = itemView.findViewById(R.id.song_name);
+            song_artist = itemView.findViewById(R.id.song_artist);
+        }
     }
 }

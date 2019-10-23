@@ -9,19 +9,26 @@ public class songsQuery {
     private long id;
     private String artist;
     private String title;
-    private String album;
+    //private String album;
     /*
     private String folder;
     private String genre;
     private String image;
     */
 
-    songsQuery(long id, String artist, String title, String album /*String folder, String genre, String image*/) {
+    //TODO create an empty constructor; if there is any error i suspect that might be caused by it
+
+    public songsQuery() {
+
+    }
+
+    songsQuery(long id, String artist, String title /*String album ,String folder, String genre, String image*/) {
         this.id = id;
         this.artist = artist;
         this.title = title;
-        this.album = album;
+
         /*
+        this.album = album;
         this.folder = folder;
         this.genre = genre;
         this.image = image;
@@ -52,6 +59,7 @@ public class songsQuery {
         this.title = title;
     }
 
+    /*
     public String getAlbum() {
         return album;
     }
@@ -60,7 +68,7 @@ public class songsQuery {
         this.album = album;
     }
 
-    /*
+
     public String getFolder() {
         return folder;
     }
