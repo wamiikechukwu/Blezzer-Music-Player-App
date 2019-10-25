@@ -49,8 +49,8 @@ public class songAdapter extends BaseAdapter {
         songsQuery getCurrentSongs = songs.get(position);
 
         //SET THE SONGS INTO THE TEXT VIEW, USING SELECTED MATERIAL
-        songName.setText(getCurrentSongs.getArtist());
-        songArtist.setText(getCurrentSongs.getDisplayName());
+        songName.setText(getCurrentSongs.getDisplayName());
+        songArtist.setText(getCurrentSongs.getArtist());
 
         relativeLayout.setTag(position);
 
