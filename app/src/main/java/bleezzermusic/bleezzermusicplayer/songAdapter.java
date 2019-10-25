@@ -52,7 +52,6 @@ public class songAdapter extends BaseAdapter {
         songName.setText(getCurrentSongs.getDisplayName());
         songArtist.setText(getCurrentSongs.getArtist());
 
-
         relativeLayout.setTag(position);
 
         return relativeLayout;
