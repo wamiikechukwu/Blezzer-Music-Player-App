@@ -50,7 +50,7 @@ public class songAdapter extends BaseAdapter {
 
         //SET THE SONGS INTO THE TEXT VIEW, USING SELECTED MATERIAL
         songName.setText(getCurrentSongs.getArtist());
-        songArtist.setText(getCurrentSongs.getTitle());
+        songArtist.setText(getCurrentSongs.getDisplayName());
 
         relativeLayout.setTag(position);
 

@@ -5,53 +5,53 @@
         <item
             android:id="@+id/home"
             android:icon="@drawable/ic_home"
-            android:title="@string/home" />
+            android:displayName="@string/home" />
 
         <item
             android:id="@+id/albums"
             android:icon="@drawable/ic_album"
-            android:title="@string/albums" />
+            android:displayName="@string/albums" />
 
         <item
             android:id="@+id/songs"
             android:icon="@drawable/ic_song"
-            android:title="@string/songs" />
+            android:displayName="@string/songs" />
 
         <item
             android:id="@+id/artist"
             android:icon="@drawable/ic_artist"
-            android:title="@string/artist" />
+            android:displayName="@string/artist" />
 
         <item
             android:id="@+id/folder"
             android:icon="@drawable/ic_folder"
-            android:title="@string/folders" />
+            android:displayName="@string/folders" />
 
 
         <item
             android:id="@+id/playlist"
             android:icon="@drawable/ic_playlist"
-            android:title="@string/play_list" />
+            android:displayName="@string/play_list" />
 
         <item
             android:id="@+id/equalizer"
             android:icon="@drawable/ic_equalizer"
-            android:title="@string/equalizer" />
+            android:displayName="@string/equalizer" />
 
         <item
             android:id="@+id/setting"
             android:icon="@drawable/ic_settings"
-            android:title="@string/setting" />
+            android:displayName="@string/setting" />
 
         <item
             android:id="@+id/share"
             android:icon="@drawable/ic_share"
-            android:title="@string/share" />
+            android:displayName="@string/share" />
 
         <item
             android:id="@+id/about"
             android:icon="@drawable/ic_about"
-            android:title="@string/about" />
+            android:displayName="@string/about" />
 
     </group>
 </menu>

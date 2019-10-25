@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.SearchView;
+import android.widget.TabHost;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,10 +48,14 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
     private MusicController musicController;
     private boolean pause = false;
     private boolean pausePlayBack = false;
+
     //INSTANCE VARIABLE FOR THE NAVIGATION DRAWER
     private NavigationView navigationView;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private DrawerLayout drawerLayout;
+
+    //INSTANCE VARIABLE FOR THE TAB HOST
+    TabHost tabHost;
 
     private ServiceConnection musicConnection = new ServiceConnection() {
         @Override
@@ -100,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
         Collections.sort(songArrayList, new Comparator<songsQuery>() {
             public int compare(songsQuery a, songsQuery b) {
-                return a.getTitle().compareTo(b.getTitle());
+                return a.getDisplayName().compareTo(b.getDisplayName());
             }
         });
         songAdapter songAdapter = new songAdapter(this, songArrayList);
@@ -139,6 +144,21 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
                 return true;
             }
         });
+
+        //SETTING UP THE TAB HOST IN THE MAIN ACTIVITY
+        tabHost = findViewById(R.id.tab_host);
+        tabHost.setup();
+
+        TabHost.TabSpec tabSpec;
+
+        //Tab One
+        tabSpec = tabHost.newTabSpec("tab one").setContent(R.id.tab_1).setIndicator("Songs");
+        tabHost.addTab(tabSpec);
+
+        //Tab Two
+        tabSpec = tabHost.newTabSpec("tab two").setContent(R.id.tab_2).setIndicator("Albums");
+        tabHost.addTab(tabSpec);
+
     }
 
     @Override

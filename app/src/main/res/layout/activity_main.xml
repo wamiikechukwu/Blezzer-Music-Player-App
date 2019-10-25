@@ -12,10 +12,59 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
-        <ListView
-            android:id="@+id/song_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <TabHost
+            android:id="@+id/tab_host"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:id="@+id/tab_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+
+                        <ListView
+                            android:id="@+id/song_list"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/tab_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Album"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="21sp" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                </TabWidget>
+            </LinearLayout>
+        </TabHost>
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

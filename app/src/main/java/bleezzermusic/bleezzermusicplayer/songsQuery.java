@@ -8,7 +8,7 @@ public class songsQuery {
 
     private long id;
     private String artist;
-    private String title;
+    private String displayName;
     private String album;
     /*
     private String folder;
@@ -16,10 +16,10 @@ public class songsQuery {
     private String image;
     */
 
-    songsQuery(long id, String artist, String title, String album /*String folder, String genre, String image*/) {
+    songsQuery(long id, String artist, String displayName, String album /*String folder, String genre, String image*/) {
         this.id = id;
         this.artist = artist;
-        this.title = title;
+        this.displayName = displayName;
         this.album = album;
         /*
         this.folder = folder;
@@ -44,12 +44,12 @@ public class songsQuery {
         this.artist = artist;
     }
 
-    String getTitle() {
-        return title;
+    String getDisplayName() {
+        return displayName;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getAlbum() {
