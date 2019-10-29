@@ -54,6 +54,7 @@ public class songAdapter extends BaseAdapter {
 
         relativeLayout.setTag(position);
 
+
         return relativeLayout;
     }
 }
