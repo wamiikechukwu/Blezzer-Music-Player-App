@@ -305,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         musicController.show();
     }
 
-
     @Override
     public void start() {
         musicService.go();
