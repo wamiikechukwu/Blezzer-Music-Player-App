@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         }
     }
 
+
     private void getSongsFromDevice() {
 
         //CREATED A CONTENT RESOLVER INSTANCE, TO RETRIEVE THE URI FOR EXTERNAL MUSIC FILES
