@@ -103,9 +103,10 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
         getSongsFromDevice();
 
+        //ARRANGE HOW THE SONGS WILL DISPLAY ON THE PHONE BY THE ALPHABETICAL ORDER OF THE TITLE
         Collections.sort(songArrayList, new Comparator<songsQuery>() {
             public int compare(songsQuery a, songsQuery b) {
-                return a.getDisplayName().compareTo(b.getDisplayName());
+                return a.getTitle().compareTo(b.getTitle());
             }
         });
         songAdapter songAdapter = new songAdapter(this, songArrayList);
@@ -201,15 +202,24 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         //CREATED A CONTENT RESOLVER INSTANCE, TO RETRIEVE THE URI FOR EXTERNAL MUSIC FILES
         ContentResolver musicResolver = getContentResolver();
 
-        //CREATED A CURSOR INSTANCE USING THE CONTENT RESOLVER INSTANCE TO QUERY THE MUSIC FILES
+        // QUERY THE AUDIO FILES IN THE DEVICE
         Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
+        //QUERY THE ALBUM FILES IN THE DEVICE (IN OTHER TO GET THE ALBUM ART)
+        Uri albumUri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
+
+        //CURSOR FOR THE AUDIO FILES
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
-        if (musicCursor != null && musicCursor.moveToFirst()) {
-            int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
+        //CURSOR FOR THE ALBUM FILES (INORDER TO GET THE ALBUM ART)
+        Cursor albumCursor = musicResolver.query(albumUri, null, null, null, null);
+
+        if (musicCursor != null && musicCursor.moveToFirst() && albumCursor != null && musicCursor.moveToFirst()) {
+            int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
             int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
+            int albumArtColumn = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
 
             do {
                 long songId = musicCursor.getLong(idColumn);
@@ -217,10 +227,33 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
                 String songArtist = musicCursor.getString(artistColumn);
                 String songAlbum = musicCursor.getString(albumColumn);
 
-                songArrayList.add(new songsQuery(songId, songTitle, songArtist, songAlbum));
+                //THIS IS TO CLEAR OFF THE RECENT ALBUM ART
+                String songAlbumArt = "";
+
+                try {
+                    //GET THE POSITION OF THE SONG
+                    albumCursor.moveToPosition(musicCursor.getPosition());
+
+                    //THEN REPLACE THE ALBUM ART OF SONG
+                    songAlbumArt = albumCursor.getString(albumArtColumn);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                songArrayList.add(new songsQuery(songId, songTitle, songArtist, songAlbum, songAlbumArt));
             }
             while (musicCursor.moveToNext());
         }
+
+        // CLOSE THE CURSOR TO SAVE PHONE'S RESOURCES
+        if (musicCursor != null) {
+            musicCursor.close();
+        }
+
+        if (albumCursor != null) {
+            albumCursor.close();
+        }
+
     }
 
     public void songSelected(View view) {

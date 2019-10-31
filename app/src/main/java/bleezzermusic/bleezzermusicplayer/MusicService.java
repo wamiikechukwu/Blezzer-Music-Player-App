@@ -55,7 +55,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         songsQuery songsQuery = songsQueries.get(songPosition);
 
         //GET THE SONG TITLE FROM THE DATA MODEL
-        songTitle = songsQuery.getDisplayName();
+        songTitle = songsQuery.getTitle();
 
         long currentSong = songsQuery.getId();
         Uri songUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSong);

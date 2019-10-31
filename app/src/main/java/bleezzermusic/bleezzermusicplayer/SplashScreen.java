@@ -29,7 +29,7 @@ public class SplashScreen extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //SHPW THE MAIN ACTIVITY AFTER THE SPLASH SCREEN
+                //SHOW THE MAIN ACTIVITY AFTER THE SPLASH SCREEN
                 startActivity(new Intent(SplashScreen.this, MainActivity.class));
                 finish();
             }

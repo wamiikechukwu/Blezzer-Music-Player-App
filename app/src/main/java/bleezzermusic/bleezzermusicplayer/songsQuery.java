@@ -8,23 +8,24 @@ public class songsQuery {
 
     private long id;
     private String artist;
-    private String displayName;
+    private String title;
     private String album;
+    private String image;
+
     /*
     private String folder;
     private String genre;
-    private String image;
     */
 
-    songsQuery(long id, String artist, String displayName, String album /*String folder, String genre, String image*/) {
+    songsQuery(long id, String artist, String title, String album, String image /*String folder, String genre*/) {
         this.id = id;
         this.artist = artist;
-        this.displayName = displayName;
+        this.title = title;
         this.album = album;
+        this.image = image;
         /*
         this.folder = folder;
         this.genre = genre;
-        this.image = image;
          */
     }
 
@@ -44,12 +45,12 @@ public class songsQuery {
         this.artist = artist;
     }
 
-    String getDisplayName() {
-        return displayName;
+    String getTitle() {
+        return title;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getAlbum() {
@@ -58,6 +59,14 @@ public class songsQuery {
 
     public void setAlbum(String album) {
         this.album = album;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     /*
@@ -75,14 +84,6 @@ public class songsQuery {
 
     public void setGenre(String genre) {
         this.genre = genre;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
      */
 }
