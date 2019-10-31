@@ -19,7 +19,7 @@
         android:layout_marginBottom="80dp"
         android:text="Bleezzer Music"
         android:textColor="@color/colorPrimary"
-        android:textSize="27sp"
+        android:textSize="23sp"
         android:textStyle="bold"
         android:typeface="monospace" />
 

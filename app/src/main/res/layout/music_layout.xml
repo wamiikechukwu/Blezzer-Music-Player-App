@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:onClick="songSelected">
 
     <ImageView
-        android:id="@+id/song_image"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_marginStart="5dp"
-        android:contentDescription="Image of the artist or album"
-        android:src="@drawable/ic_song_image" />
+        android:id="@+id/circular_image"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:contentDescription="@string/the_image_of_the_song" />
 
     <TextView
         android:id="@+id/song_name"
-        android:layout_toEndOf="@id/song_image"
+        android:layout_toEndOf="@id/circular_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -25,13 +24,12 @@
 
     <TextView
         android:id="@+id/song_artist"
-        android:layout_toEndOf="@id/song_image"
+        android:layout_toEndOf="@id/circular_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/song_name"
         android:layout_margin="5dp"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
         android:lines="1"
         android:textColor="#F0000000"
         android:textSize="15sp" />
