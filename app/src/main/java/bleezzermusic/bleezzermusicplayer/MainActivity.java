@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         //CURSOR FOR THE ALBUM FILES (INORDER TO GET THE ALBUM ART)
         Cursor albumCursor = musicResolver.query(albumUri, null, null, null, null);
 
-        if (musicCursor != null && musicCursor.moveToFirst() && albumCursor != null && musicCursor.moveToFirst()) {
+        if (musicCursor != null && musicCursor.moveToFirst() && albumCursor != null && albumCursor.moveToFirst()) {
             int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
                 String songTitle = musicCursor.getString(titleColumn);
                 String songArtist = musicCursor.getString(artistColumn);
                 String songAlbum = musicCursor.getString(albumColumn);
+
 
                 //THIS IS TO CLEAR OFF THE RECENT ALBUM ART
                 String songAlbumArt = "";
