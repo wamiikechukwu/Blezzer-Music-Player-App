@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -10,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context=".MainActivity">
@@ -28,13 +28,13 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
+                    <!--THIS TAB WIDGET SHOULD BE ABOVE THE FRAME LAYOUT -->
                     <FrameLayout
                         android:id="@android:id/tabcontent"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-
-                        <LinearLayout
+                        <RelativeLayout
                             android:id="@+id/tab_1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
@@ -43,9 +43,28 @@
                                 android:id="@+id/recycler_view"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginTop="?attr/actionBarSize"
                                 android:scrollbars="vertical" />
-                        </LinearLayout>
+
+                            <RelativeLayout
+                                android:id="@+id/bottom_bar_container"
+                                android:layout_width="match_parent"
+                                android:layout_height="60dp"
+                                android:layout_alignParentBottom="true"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:visibility="invisible">
+
+                                <ImageView
+                                    android:id="@+id/bottom_bar_album_art"
+                                    android:layout_width="60dp"
+                                    android:layout_height="60dp"
+                                    android:layout_alignParentStart="true"
+                                    android:background="#FF000000"
+                                    android:scaleType="centerInside"
+                                    android:src="@drawable/default_picture" />
+                            </RelativeLayout>
+
+                        </RelativeLayout>
 
                         <LinearLayout
                             android:id="@+id/tab_2"
@@ -66,7 +85,6 @@
                         android:id="@android:id/tabs"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
-
                     </TabWidget>
                 </LinearLayout>
             </TabHost>
