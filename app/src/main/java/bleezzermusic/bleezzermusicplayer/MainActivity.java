@@ -1,18 +1,20 @@
 package bleezzermusic.bleezzermusicplayer;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -20,34 +22,70 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.MediaController;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TabHost;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 
-public class MainActivity extends AppCompatActivity implements MediaController.MediaPlayerControl {
+public class MainActivity extends AppCompatActivity {
 
-    //LOG TITLE TO BE USED CHECK FOR ANY ERRORS IN LOGCAT
-    public static final String LOG = "LOG";
-    //THE SONG WILL BE STORED IN THIS ARRAYLIST
+    private static final int NOTIFY_ID = 1;
+    //TO HAVE ACCESS TO THE AUDIO VOLUME
+    //TODO: I HAVE TO MAKE USERS BE ABLE TO MUTE THE SONG BEING PLAYED ON THE PLAYBACK SCREEN
+    private static AudioManager audioManager;
+    //USE THIS CLASS NAME TO DEBUG THE APP (THAT IS, TO CHECK FOR ERRORS)
+    public final String LOG = getClass().getSimpleName();
+    // SAVE INSTANCES IN THE APP
+    private final String TAG_SONG_ID = "SONG_ID";
+    private final String TAG_POSITION = "POSITION";
+    private final String TAG_PAUSE_STATE = "PAUSE_STATE";
+    private final String CURRENT_REWIND = "CURRENT_REWIND";
+    //ARRAYLIST
     ArrayList<songsQuery> songArrayList;
-    MusicService musicService;
-    //CREATED A GLOBAL VARIABLE OF THE  LIST VIEW
-    private ListView listView;
-    private Intent playIntent;
-    private boolean musicBound = false;
-    private MusicController musicController;
-    private boolean pause = false;
-    private boolean pausePlayBack = false;
+    songAdapter songAdapter = new songAdapter(this, songArrayList);
+    TabHost.TabSpec tabSpec;
+    //POSSIBLY TO SHOW THE CURRENT SONG BEING PLAYED
+    //TODO: UPDATE THE COMMENT SO TELL WHAT IT DOES, WHEN I HAVE FINALLY IMPLEMENTED IT
+    private NotificationManager notificationManager;
+    private Notification notification;
+    //THESE IMAGE BUTTON WILL HOLD THE PLAYBACK IMAGES
+    private ImageButton playStop_ImageButton;
+    private ImageButton rewindForward_ImageButton;
+    private ImageButton rewindBack_ImageButton;
+    private ImageButton next_ImageButton;
+    private ImageButton previous_ImageButton;
+    private ImageButton controlShuffle_ImageButton;
+    private ImageButton controlRepeat__ImageButton;
+
+    //TODO: WILL ADD TIMER IN THE LATER VERSION (LINE 139)
+    //IMAGE BUTTON FOR THE ALBUM COVER ART
+    private ImageView albumCoverArt;
+    //RECYCLERVIEW PARAMETERS
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter songAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+    //USE TO CONTROL PLAY BACK FOR THE AUDIO FILES
+    //TODO: LATER UPDATE THE COMMENT, TO PROPERLY DESCRIBE WHAT IT DOES IN THE CODE
+    private MediaPlayer mediaPlayer;
+    //I BELIEVE THIS IS USE TO DISPLAY RANDOM NUMBER FOR THE SHUFFLE BUTTON
+    //TODO: DONT FOEGET TO PROPERLY EXPLAIN WHAT THIS DO IN THE CODE
+    private Random random;
+    //SONG DETAILS/VARIABLES
+    private String songTitle = "";
+    private int songPosition;
+    private int rewindLenght = 5;
+    private boolean shuffle = false;
 
     //INSTANCE VARIABLE FOR THE NAVIGATION DRAWER
     private NavigationView navigationView;
@@ -56,31 +94,16 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
 
     //INSTANCE VARIABLE FOR THE TAB HOST
     TabHost tabHost;
+    private boolean paused = true;
+    private boolean repeat = false;
 
-    private ServiceConnection musicConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
-            musicService = binder.getService();
-
-            //TODO if there is problem, check this list
-
-            musicService.setList(songArrayList);
-
-            musicBound = true;
+    {
+        public int compare (songsQuery a, songsQuery b){
+        return a.getTitle().compareTo(b.getTitle());
+    }
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            //musicService.setList(songArrayList);
-            musicBound = false;
-        }
-    };
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         //GET THE ACTION BAR AND CUSTOMIZE IT
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -99,30 +122,9 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
         listView = findViewById(R.id.song_list);
 
         //INSTANTIATE THE  ARRAYLIST
-        songArrayList = new ArrayList<songsQuery>();
+    songArrayList =new ArrayList<songsQuery>()
 
-        getSongsFromDevice();
-
-        //ARRANGE HOW THE SONGS WILL DISPLAY ON THE PHONE BY THE ALPHABETICAL ORDER OF THE TITLE
-        Collections.sort(songArrayList, new Comparator<songsQuery>() {
-            public int compare(songsQuery a, songsQuery b) {
-                return a.getTitle().compareTo(b.getTitle());
-            }
-        });
-        songAdapter songAdapter = new songAdapter(this, songArrayList);
-        listView.setAdapter(songAdapter);
-
-        setMusicController();
-
-        // NAVIGATION DRAWER
-        drawerLayout = findViewById(R.id.drawer_layout);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.Open, R.string.Close);
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        navigationView = findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+    {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 int item = menuItem.getItemId();
@@ -144,23 +146,98 @@ public class MainActivity extends AppCompatActivity implements MediaController.M
                 }
                 return true;
             }
-        });
+    }
 
-        //SETTING UP THE TAB HOST IN THE MAIN ACTIVITY
+    //ARRANGE HOW THE SONGS WILL DISPLAY ON THE PHONE BY THE ALPHABETICAL ORDER OF THE TITLE
+        Collections.sort(songArrayList,new Comparator<songsQuery>()
+
+    getSongsFromDevice();)
+
+    setMusicController();
+        listView.setAdapter(songAdapter)
+
+    getSupportActionBar()
+
+    // NAVIGATION DRAWER
+    drawerLayout =
+
+    findViewById(R.id.drawer_layout);
+
+    actionBarDrawerToggle =new
+
+    ActionBarDrawerToggle(this,drawerLayout, R.string.Open, R.string.Close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle)
+            actionBarDrawerToggle.syncState()
+
+    setDisplayHomeAsUpEnabled(true);.
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //INSTANTIATE
+        //audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        initLayout();
+
+        songPosition = 0;
+        random = new Random(getRandomSeed());
+
+        setUpRecyclerView();
+        initMusicPlayer();
+
+        if (savedInstanceState != null) {
+            setRewindLength(savedInstanceState.getInt(CURRENT_REWIND, 10));
+
+            setSongPosition(savedInstanceState.getInt(TAG_SONG_ID, 0));
+            playSong();
+            seek(savedInstanceState.getInt(TAG_POSITION, 0));
+
+            if (savedInstanceState.getBoolean(TAG_PAUSE_STATE, false)) {
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        setPauseState(true);
+                    }
+                }, 50);
+            }
+        }
+    }
+
+    navigationView =
+
+    findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
+
+    private void initLayout() {
+    })
+
+    //SETTING UP THE TAB HOST IN THE MAIN ACTIVITY
         tabHost = findViewById(R.id.tab_host);
-        tabHost.setup();
+        tabHost.setup()
 
-        TabHost.TabSpec tabSpec;
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(TAG_POSITION, getCurrentPosition());
+        outState.putInt(TAG_SONG_ID, getSongPosition());
+        outState.putBoolean(TAG_PAUSE_STATE, paused);
+        outState.putInt(CURRENT_REWIND, rewindLenght);
+
+        super.onSaveInstanceState(outState);
+    }
 
         //Tab One
         tabSpec = tabHost.newTabSpec("tab one").setContent(R.id.tab_1).setIndicator("Songs");
-        tabHost.addTab(tabSpec);
+        tabHost.addTab(tabSpec)
 
-        //Tab Two
+    //Tab Two
         tabSpec = tabHost.newTabSpec("tab two").setContent(R.id.tab_2).setIndicator("Albums");
-        tabHost.addTab(tabSpec);
+        tabHost.addTab(tabSpec)
 
-    }
+}
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
