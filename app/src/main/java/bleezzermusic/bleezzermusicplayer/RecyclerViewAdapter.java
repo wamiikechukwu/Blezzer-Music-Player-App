@@ -3,12 +3,17 @@ package bleezzermusic.bleezzermusicplayer;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -29,18 +34,40 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         RelativeLayout songLay = myViewHolder.songLay;
         TextView songView = myViewHolder.songView;
         TextView artistView = myViewHolder.artistView;
-        ImageView albumArt = myViewHolder.albumArt;
+        final ImageView albumArt = myViewHolder.albumArt;
 
         songsQuery currentSongsQuery = songsRecyclerViewArrayList.get(i);
 
         if (albumArt != null) {
-            if (!currentSongsQuery)
+            if (!currentSongsQuery.getImage().equalsIgnoreCase("")) {
+                Picasso.get().load(currentSongsQuery.getImage()).into(albumArt, new Callback() {
+
+                    @Override
+                    public void onSuccess() {
+                        if (albumArt.getDrawable() == null) {
+                            Log.e(TAG, "onBindViewHolder() -> onSuccess() -> Drawable is null");
+                            Picasso.get().load(R.drawable.default_picture).into(albumArt);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e(TAG, "onBindViewHolder() -> onError() ->");
+                        Picasso.get().load(R.drawable.default_picture).into(albumArt);
+                    }
+                });
+            } else {
+                Glide.with(context).load(R.drawable.default_picture).into(albumArt);
+            }
+            
         }
+        songView.setText(currentSongsQuery.getTitle());
+        artistView.setText(currentSongsQuery.getArtist());
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return songsRecyclerViewArrayList.size();
     }
 
     @NonNull
