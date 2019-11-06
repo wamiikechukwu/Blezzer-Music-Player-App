@@ -29,7 +29,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     //FOR BOTTOM BAR
     private RelativeLayout bottom_bar_container;
     private RelativeLayout bottom_bar_open;
-    private FrameLayout bottom_bar_reveal;
+    private RelativeLayout bottom_bar_reveal;
     private RecyclerViewAdapter songAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private ImageView bottom_bar_album_art;
