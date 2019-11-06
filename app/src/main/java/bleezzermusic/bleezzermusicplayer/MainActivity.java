@@ -1,6 +1,5 @@
 package bleezzermusic.bleezzermusicplayer;
 
-import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,22 +7,20 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSeekBar;
@@ -31,7 +28,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -39,7 +35,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
-import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -51,18 +46,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    //I DO NOT KNOW THAT THIS ID DOES
     private static final int NOTIFY_ID = 1;
 
     //TO HAVE ACCESS TO THE AUDIO VOLUME
-    //TODO: I HAVE TO MAKE USERS BE ABLE TO MUTE THE SONG BEING PLAYED ON THE PLAYBACK SCREEN
     private static AudioManager audioManager;
+
     //USE THIS CLASS NAME TO DEBUG THE APP (THAT IS, TO CHECK FOR ERRORS)
     public final String TAG = getClass().getSimpleName();
-    private Notification notification;
     // SAVE INSTANCES IN THE APP
     private final String TAG_SONG_ID = "SONG_ID";
     private final String TAG_POSITION = "POSITION";
@@ -70,10 +67,14 @@ public class MainActivity extends AppCompatActivity {
     private final String CURRENT_REWIND = "CURRENT_REWIND";
     //ARRAY LIST FOR THE RECYCLER VIEW
     ArrayList<songsQuery> songArrayList;
-    TabHost.TabSpec tabSpec;
-    //SHOW THE CURRENT SONG BEING PLAYED ON THE NOTIFICATION BAR
+    //USE TO DISPLAY THE TAB HOST
+
+    //COORDINATE LAYOUT
+    CoordinatorLayout coordinator_layout;
+    //FIGURE OUT WHAT THIS DOES
+    private Notification notification;
+    //USE SHOW THE CURRENT SONG BEING PLAYED ON THE NOTIFICATION BAR
     private NotificationManager notificationManager;
-    //THESE IMAGE BUTTON WILL HOLD THE PLAYBACK IMAGES
     // FOR BOTTOM SHEET
     private ImageView bottom_sheet_album_art;
     private TextView time_stamp_current;
@@ -93,68 +94,43 @@ public class MainActivity extends AppCompatActivity {
     //FOR BOTTOM BAR
     private RelativeLayout bottom_bar_container;
     private RelativeLayout bottom_bar_open;
-
-    //TODO: WILL ADD TIMER IN THE LATER VERSION (LINE 139)
     private FrameLayout bottom_bar_reveal;
     private RecyclerViewAdapter songAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private ImageView bottom_bar_album_art;
-
+    private ProgressBar song_progress;
+    private TextView bottom_bar_song_title;
+    private TextView bottom_bar_song_artist;
+    private ImageButton bottom_bar_play_stop;
     //USE TO CONTROL PLAY BACK FOR THE AUDIO FILES
     //TODO: LATER UPDATE THE COMMENT, TO PROPERLY DESCRIBE WHAT IT DOES IN THE CODE
     private MediaPlayer mediaPlayer;
-
     //I BELIEVE THIS IS USE TO DISPLAY RANDOM NUMBER FOR THE SHUFFLE BUTTON
     //TODO: DONT FOEGET TO PROPERLY EXPLAIN WHAT THIS DO IN THE CODE
     private Random random;
-
     //SONG DETAILS/VARIABLES
     private String songTitle = "";
     private int songPosition;
     private int rewindLenght = 5;
     private boolean shuffle = false;
-    private ProgressBar song_progress;
-    private TextView bottom_bar_song_title;
-    private TextView bottom_bar_song_artist;
-    private ImageButton bottom_bar_play_stop;
+    //BUTTOM SHEET VIEW
+    private View bottomSheetFrame;
+    // I DO NOT KNOW WHAT THIS DOES
+    private Timer timer = new Timer();
+    private TimerTask updateTask;
     //RECYCLER VIEW PARAMETERS
     private RecyclerView recyclerView;
     private boolean paused = true;
     private boolean repeat = false;
     private boolean muteVolume = false;
-
     //INSTANCE VARIABLE FOR THE NAVIGATION DRAWER
     private NavigationView navigationView;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private DrawerLayout drawerLayout;
-
-    //INSTANCE VARIABLE FOR THE TAB HOST
-    TabHost tabHost;
     //I THOUGHT I WOULD NEVER USE THIS BUT I ENDED UP USING IT, THIS IS USE TO DESCRIBE HOW THE
     //BOTTOM SHEET WOULD APPEARS WHEN A USER CLICK ON THE BOTTOM BAR
     private BottomSheetBehavior bottomSheetBehavior;
 
-    {
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-            }, 1);
-            return;
-        }
-    }
-
-    //GET THE ACTION BAR AND CUSTOMIZE IT
-    getSupportActionBar()
-
-    setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-
-    getSupportActionBar()
-
-    setCustomView(R.layout.action_bar_layout);
-
-    getSupportActionBar()
-
-    setElevation(30);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,8 +146,11 @@ public class MainActivity extends AppCompatActivity {
         songPosition = 0;
         random = new Random(getRandomSeed());
 
+        initBottomSheet();
         setUpRecyclerView();
         initMusicPlayer();
+        checkMute();
+
 
         if (savedInstanceState != null) {
             setRewindLength(savedInstanceState.getInt(CURRENT_REWIND, 10));
@@ -195,9 +174,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //STILL DONT REALLY KNOW WHAT THIS DOES
+    private long getRandomSeed() {
+        return System.currentTimeMillis();
+    }
+
     private void initLayout() {
         // BOTTOM BAR
-
+        //COORDINATE LAYOUT
+        coordinator_layout = findViewById(R.id.coordinator_layout);
         //FRAME LAYOUT
         bottom_bar_reveal = findViewById(R.id.bottom_bar_reveal);
         //RELATIVE LAYOUT FOR THE BOTTOM SHEET
@@ -381,6 +366,94 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+    private void setPauseState(boolean isPaused) {
+        Log.d(TAG, "setPauseState() -> " + isPaused);
+        if (isPaused) {
+            paused = true;
+
+            //FOR THE BOTTOM SHEET
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_play)
+                    .into(bottom_sheet_play_stop);
+
+            //FOR THE BOTTOM BAR
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_bar_play_stop);
+
+            makeNotification(R.drawable.ic_pause);
+            pause();
+        } else {
+            paused = false;
+
+            //BOTTOM SHEET
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_sheet_play_stop);
+            Glide // Bottom Bar
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_bar_play_stop);
+            makeNotification(R.drawable.ic_play);
+            start();
+        }
+    }
+
+    private void initBottomSheet() {
+        // Bottom Sheet Primary
+        bottomSheetFrame = coordinator_layout.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFrame);
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_DRAGGING: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_DRAGGING");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_SETTLING: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_SETTLING");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_EXPANDED: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_EXPANDED");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_COLLAPSED: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_COLLAPSED");
+
+                    }
+
+                    case BottomSheetBehavior.STATE_HIDDEN: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_HIDDEN");
+
+                        break;
+                    }
+
+                    default: {
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+    }
+
+
     //I DO NOT KNOW WHAT THIS DOES DOES, I HOPE TO FIND OUT SOON
     private songsQuery findSongByID(ArrayList<songsQuery> arrayList, long id) {
         for (songsQuery song : arrayList) {
@@ -478,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         songAdapter = new RecyclerViewAdapter(this, songArrayList);
 
-        recyclerView.setHasFixedSize(false); //I CAN STILL SET THIS TO TRUE, IF ANY ERROR ARISES
+        recyclerView.setHasFixedSize(false); //TODO CAN STILL SET THIS TO TRUE, IF ANY ERROR ARISES
         recyclerView.setLayoutManager(layoutManager);
 
         //I DO NOT KNOW WHAT THIS DOES, UPDATE THIS TO EXPLAIN WHAT IT DOES
@@ -507,6 +580,12 @@ public class MainActivity extends AppCompatActivity {
                 return a.getTitle().compareTo(b.getTitle());
             }
         });
+    }
+
+    //TODO THIS IS USED IN THE ACTION BAR, I CAN STILL USE THIS IN A FLOATING BAR TO SHUFFLE SONGS
+    private void shuffleSongList() {
+        Collections.shuffle(songArrayList, new Random(getRandomSeed()));
+        songAdapter.notifyDataSetChanged();
     }
 
     private void playSong() {
@@ -543,22 +622,56 @@ public class MainActivity extends AppCompatActivity {
         playSong();
     }
 
-    // I BELIEVE THIS OPEN/SHOW THE BOTTOM SHEET/BAR, I DONT KNOW WHY THEY USED THE ANIMATION,
-    // I WILL UPDATE IT WHEN I FIGURE IT OUT
+    private void startUpdateTask(songsQuery song) {
+        setPauseState(false);
+
+        prepareUpdateTask(song);
+
+        if (updateTask != null) {
+            updateTask.cancel();
+        }
+        if (timer != null) {
+            timer.cancel();
+        }
+
+        updateTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            song_progress.setProgress(getCurrentPosition());
+                            seek_bar.setProgress(getCurrentPosition());
+                            time_stamp_current.setText(msToString(getCurrentPosition()));
+
+                            Log.d(TAG, "updateTask -> Current position: " + msToString(getCurrentPosition()));
+                        } catch (Exception ex) {
+                            Log.e(TAG, "updateTask -> ", ex);
+                        }
+                    }
+                });
+            }
+        };
+        timer = new Timer();
+        timer.schedule(updateTask, 0, 1000);
+    }
+
+    private void stopUpdateTask() {
+        if (timer != null)
+            timer.cancel();
+        if (updateTask != null)
+            updateTask.cancel();
+    }
+
+    // I BELIEVE THIS OPEN/SHOW THE BOTTOM SHEET/BAR, THERE WAS AN ANIMATION HERE BUT I DISCARDED IT,
+    //I WILL TRY RO SEE HOW I CAN ACHIEVE THIS MY SELF
     private void openBottomBar() {
         if (bottom_bar_reveal.getVisibility() == View.GONE) {
-            // AnimationSupport.Reveal.openFromLeft(RLbottomBarContainer, new AnimationSupport.Reveal.AnimationAction() {
-            //  @Override
-            //public void onPrepare() {
             bottom_bar_reveal.setVisibility(View.VISIBLE);
+
+            //THIS IS USE TO MAKE THE BOTTOM BAR CONTAINER VISIBLE
             bottom_bar_container.setVisibility(View.VISIBLE);
-            // }
-
-            // @Override
-            //public void onStart() {
-
-            //}
-            //});
         }
     }
 
@@ -676,6 +789,14 @@ public class MainActivity extends AppCompatActivity {
         seek_bar.setMax(getDuration());
     }
 
+    private void checkMute() {
+        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0) {
+            bottom_sheet_control_volume.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_off));
+        } else {
+            bottom_sheet_control_volume.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_up));
+        }
+    }
+
     //QUERY THE USER'S DEVICE TO GET SONGS / ALBUM COVER ART
     public void getSongList() {
         ContentResolver musicResolver = getContentResolver();
@@ -745,13 +866,11 @@ public class MainActivity extends AppCompatActivity {
         return finalTimerString;
     }
 
+
     //METHODS FOR INDIVIDUAL PLAY BACK
     public int getCurrentPosition() {
         return mediaPlayer.getCurrentPosition();
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private int getSongPosition() {
         return songPosition;
@@ -760,7 +879,7 @@ public class MainActivity extends AppCompatActivity {
     //SET THE SONG
     private void setSongPosition(int songIndex) {
         songPosition = songIndex;
-    }.
+    }
 
     public void playNext() {
         if (shuffle) {
@@ -783,7 +902,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             setShuffleOn();
         }
-    }.
+    }
 
     public int getRewindLenght() {
         return rewindLenght;
@@ -791,105 +910,100 @@ public class MainActivity extends AppCompatActivity {
 
     public void setRewindLength(int length) {
         this.rewindLenght = length;
-    }.
+    }
+
 
     private void seek(int anInt) {
         mediaPlayer.seekTo(anInt);
     }
 
-        if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.M)
-
     public int getDuration() {
         return mediaPlayer.getDuration();
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        int item = menuItem.getItemId();
-        switch (item) {
-            case R.id.home:
-                //Toast.makeText(getApplicationContext(), "Account Click", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.albums:
-                // Toast.makeText(getApplicationContext(), "Setting Click", Toast.LENGTH_SHORT).show();
-                break;
-
-            case R.id.songs:
-                //Toast.makeText(getApplicationContext(), "My cart Click", Toast.LENGTH_SHORT).show();
-                break;
-
-            default:
-                return true;
-        }
-        return true;
+    public boolean isPlaying() {
+        return mediaPlayer.isPlaying();
     }
+
+    public void rewindForward(int interval) {
+        seek(getCurrentPosition() + interval * 1000);
+    }
+
+    public void rewindBack(int interval) {
+        seek(getCurrentPosition() - interval * 1000);
+    }
+
+    public void start() {
+        mediaPlayer.start();
+    }
+
+    public void pause() {
+        mediaPlayer.pause();
+    }
+
+    public void stop() {
+        mediaPlayer.stop();
+    }
+
+    public void playPrevious() {
+        songPosition--;
+        if (songPosition < 0) songPosition = songArrayList.size() - 1;
+        playSong();
+    }
+
+    private void toggleRepeatState() {
+        if (repeat) {
+            setRepeatOff();
+        } else {
+            setRepeatOn();
+        }
+    }
+
+    private void setRepeatOn() {
+        repeat = true;
+
+        bottom_sheet_control_repeat.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_repeat_one));
+    }
+
+    private void setRepeatOff() {
+        repeat = false;
+
+        bottom_sheet_control_repeat.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_repeat));
+    }
+
+    @Override
+    public void onDestroy() {
+        mediaPlayer.stop();
+        mediaPlayer.release();
+
+        stopUpdateTask();
+
+        notificationManager.cancel(NOTIFY_ID);
+
+        super.onDestroy();
+    }
+
+
+    private void setShuffleOn() {
+        shuffle = true;
+
+        bottom_sheet_control_shuffle.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_shuffle));
+    }
+
+    private void setShuffleOff() {
+        shuffle = false;
+
+        bottom_sheet_control_shuffle.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_shuffle_off));
+    }
+
+    public boolean getShuffle() {
+        return shuffle;
+    }
+
+
+    private void muteAudio() {
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+        checkMute();
+    }
+
 }
-
-
-
-
-
-    getSupportActionBar()
-
-// NAVIGATION DRAWER
-    drawerLayout =
-
-            findViewById(R.id.drawer_layout);
-
-            actionBarDrawerToggle=new
-
-            ActionBarDrawerToggle(this,drawerLayout,R.string.Open,R.string.Close);
-            drawerLayout.addDrawerListener(actionBarDrawerToggle)
-            actionBarDrawerToggle.syncState()
-
-            setDisplayHomeAsUpEnabled(true);.
-
-
-            navigationView=
-
-            findViewById(R.id.navigation_view);
-            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
-
-            )
-
-            //SETTING UP THE TAB HOST IN THE MAIN ACTIVITY
-            tabHost=findViewById(R.id.tab_host);
-            tabHost.setup()
-
-
-            //Tab One
-            tabSpec=tabHost.newTabSpec("tab one").setContent(R.id.tab_1).setIndicator("Songs");
-            tabHost.addTab(tabSpec)
-
-            //Tab Two
-            tabSpec=tabHost.newTabSpec("tab two").setContent(R.id.tab_2).setIndicator("Albums");
-            tabHost.addTab(tabSpec)
-
-
-@Override
-public boolean onOptionsItemSelected(MenuItem item){
-
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)) return true;
-
-        return super.onOptionsItemSelected(item);
-        }
-
-//INFLATING THE MENU INTO THE ACTION BAR
-@Override
-public boolean onCreateOptionsMenu(Menu menu){
-
-        //ADDING THE SEARCH VIEW
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.option_menu, menu);
-
-        //ASSOCIATE THE SEARCHABLE CONFIGURATION WITH THE SEARCHVIEW
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search_view).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        return true;
-        }
-
-
-        }

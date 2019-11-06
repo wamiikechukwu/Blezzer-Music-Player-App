@@ -61,8 +61,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             
         }
-        songView.setText(currentSongsQuery.getTitle());
-        artistView.setText(currentSongsQuery.getArtist());
+        songView.setText(currentSongsQuery.getArtist());
+        artistView.setText(currentSongsQuery.getTitle());
 
         songLay.setOnClickListener(new View.OnClickListener() {
             @Override

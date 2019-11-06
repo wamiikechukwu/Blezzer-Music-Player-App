@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/music_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:onClick="songSelected">
+    android:layout_width="wrap_content"
+    android:layout_height="71dp">
 
     <ImageView
         android:id="@+id/circular_image"
@@ -32,6 +31,13 @@
         android:layout_marginStart="5dp"
         android:lines="1"
         android:textColor="#F0000000"
-        android:textSize="15sp" />
+        android:textSize="14.5sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="69dp"
+        android:layout_toEndOf="@id/circular_image"
+        android:background="#FF0006" />
 
 </RelativeLayout>

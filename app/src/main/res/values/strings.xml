@@ -14,6 +14,7 @@
     <string name="folders">Folders</string>
     <string name="share">Share</string>
     <string name="the_image_of_the_song">the image of the song</string>
+    <string name="play_or_pause_button">This is the play/stop button</string>
 
 
 </resources>
