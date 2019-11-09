@@ -22,7 +22,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     Context context;
     ArrayList<songsQuery> songsRecyclerViewArrayList;
-    //TODO dont forget to add RecyclerViewCallbacks recyclerViewCallbacks
+    RecyclerViewCallbacks recyclerViewCallbacks;
 
     public RecyclerViewAdapter(Context context, ArrayList<songsQuery> songsRecyclerViewArrayList) {
         this.context = context;
@@ -30,7 +30,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
+    public void onBindViewHolder(@NonNull final MyViewHolder myViewHolder, int i) {
         RelativeLayout songLay = myViewHolder.songLay;
         TextView songView = myViewHolder.songView;
         TextView artistView = myViewHolder.artistView;
@@ -61,8 +61,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
             
         }
-        songView.setText(currentSongsQuery.getTitle());
-        artistView.setText(currentSongsQuery.getArtist());
+        songView.setText(currentSongsQuery.getArtist());
+        artistView.setText(currentSongsQuery.getTitle());
+
+        songLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (recyclerViewCallbacks != null) {
+                    recyclerViewCallbacks.songPicked(myViewHolder.getAdapterPosition());
+                }
+            }
+        });
     }
 
     @Override
@@ -90,5 +99,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             this.artistView = itemView.findViewById(R.id.song_artist);
             this.albumArt = itemView.findViewById(R.id.circular_image);
         }
+    }
+
+    //UPDATE THIS TO EXPLAIN WHAT IT DOES
+    public void setRecyclerViewCallbacks(RecyclerViewCallbacks recyclerViewCallbacks) {
+        this.recyclerViewCallbacks = recyclerViewCallbacks;
+    }
+
+    //UPDATE THIS TO EXPLAIN WHAT IT DOES
+    public interface RecyclerViewCallbacks {
+        void songPicked(int position);
     }
 }

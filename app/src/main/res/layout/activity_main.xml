@@ -1,85 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/drawer_layout"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
 
-        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".MainActivity">
+            android:scrollbars="vertical" />
 
-            <TabHost
-                android:id="@+id/tab_host"
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottom_bar_reveal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FF000000"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:id="@+id/bottom_bar_container"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:clickable="true"
+            android:visibility="invisible">
+
+            <ImageView
+                android:id="@+id/bottom_bar_album_art"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:layout_alignParentStart="true"
+                android:background="#FF000000"
+                android:contentDescription="@string/the_image_of_the_song"
+                android:src="@drawable/default_picture" />
+
+            <ProgressBar
+                android:id="@+id/song_progress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/bottom_bar_album_art"
+                android:layout_toEndOf="@id/bottom_bar_album_art" />
+
+            <RelativeLayout
+                android:id="@+id/bottom_bar_open"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true">
+                android:background="@android:color/transparent"
+                android:layout_below="@id/song_progress"
+                android:gravity="end|center_vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/bottom_bar_play_stop"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@string/play_or_pause_button"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_play" />
+            </RelativeLayout>
 
-                    <FrameLayout
-                        android:id="@android:id/tabcontent"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/bottom_bar_song_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/bottom_bar_song_title"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/bottom_bar_album_art"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Song artist"
+                android:textColor="#FFF"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/bottom_bar_song_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/song_progress"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/bottom_bar_album_art"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Song title"
+                android:textColor="#FFF"
+                android:textSize="15.5sp" />
 
 
-                        <LinearLayout
-                            android:id="@+id/tab_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <android.support.v7.widget.RecyclerView
-                                android:id="@+id/recycler_view"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_marginTop="?attr/actionBarSize"
-                                android:scrollbars="vertical" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/tab_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="Album"
-                                android:textColor="@color/colorPrimary"
-                                android:textSize="21sp" />
-                        </LinearLayout>
-                    </FrameLayout>
-
-                    <TabWidget
-                        android:id="@android:id/tabs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                    </TabWidget>
-                </LinearLayout>
-            </TabHost>
         </RelativeLayout>
 
-        <android.support.design.widget.NavigationView
-            android:id="@+id/navigation_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            app:headerLayout="@layout/nav_header"
-            app:menu="@menu/nav_menu" />
+    </RelativeLayout>
 
-    </android.support.v4.widget.DrawerLayout>
+    <include
+        android:id="@+id/bottom_sheet"
+        layout="@layout/bottom_sheet"
+        android:visibility="gone" />
 
 </android.support.design.widget.CoordinatorLayout>

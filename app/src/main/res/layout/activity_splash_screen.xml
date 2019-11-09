@@ -18,9 +18,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="80dp"
         android:text="Bleezzer Music"
-        android:textColor="@color/colorPrimary"
-        android:textSize="23sp"
-        android:textStyle="bold"
-        android:typeface="monospace" />
+        android:textColor="#777474"
+        android:textSize="30sp"
+        android:typeface="sans" />
 
 </RelativeLayout>

@@ -3,8 +3,9 @@ package bleezzermusic.bleezzermusicplayer;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.SearchManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,66 +16,94 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatSeekBar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SearchView;
-import android.widget.TabHost;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    //I DO NOT KNOW THAT THIS ID DOES
     private static final int NOTIFY_ID = 1;
+
     //TO HAVE ACCESS TO THE AUDIO VOLUME
-    //TODO: I HAVE TO MAKE USERS BE ABLE TO MUTE THE SONG BEING PLAYED ON THE PLAYBACK SCREEN
     private static AudioManager audioManager;
+
     //USE THIS CLASS NAME TO DEBUG THE APP (THAT IS, TO CHECK FOR ERRORS)
-    public final String LOG = getClass().getSimpleName();
+    public final String TAG = getClass().getSimpleName();
     // SAVE INSTANCES IN THE APP
     private final String TAG_SONG_ID = "SONG_ID";
     private final String TAG_POSITION = "POSITION";
     private final String TAG_PAUSE_STATE = "PAUSE_STATE";
     private final String CURRENT_REWIND = "CURRENT_REWIND";
-    //ARRAYLIST
+    //ARRAY LIST FOR THE RECYCLER VIEW
     ArrayList<songsQuery> songArrayList;
-    songAdapter songAdapter = new songAdapter(this, songArrayList);
-    TabHost.TabSpec tabSpec;
-    //POSSIBLY TO SHOW THE CURRENT SONG BEING PLAYED
-    //TODO: UPDATE THE COMMENT SO TELL WHAT IT DOES, WHEN I HAVE FINALLY IMPLEMENTED IT
-    private NotificationManager notificationManager;
-    private Notification notification;
-    //THESE IMAGE BUTTON WILL HOLD THE PLAYBACK IMAGES
-    private ImageButton playStop_ImageButton;
-    private ImageButton rewindForward_ImageButton;
-    private ImageButton rewindBack_ImageButton;
-    private ImageButton next_ImageButton;
-    private ImageButton previous_ImageButton;
-    private ImageButton controlShuffle_ImageButton;
-    private ImageButton controlRepeat__ImageButton;
+    //USE TO DISPLAY THE TAB HOST
 
-    //TODO: WILL ADD TIMER IN THE LATER VERSION (LINE 139)
-    //IMAGE BUTTON FOR THE ALBUM COVER ART
-    private ImageView albumCoverArt;
-    //RECYCLERVIEW PARAMETERS
-    private RecyclerView recyclerView;
+    //COORDINATE LAYOUT
+    CoordinatorLayout coordinator_layout;
+    //FIGURE OUT WHAT THIS DOES
+    private Notification notification;
+    //USE SHOW THE CURRENT SONG BEING PLAYED ON THE NOTIFICATION BAR
+    private NotificationManager notificationManager;
+    // FOR BOTTOM SHEET
+    private ImageView bottom_sheet_album_art;
+    private TextView time_stamp_current;
+    private TextView time_stamp_duration;
+    private TextView bottom_sheet_song_title;
+    private TextView bottom_sheet_song_artist;
+    private ImageButton bottom_sheet_previous;
+    private ImageButton bottom_sheet_rewind_back;
+    private ImageButton bottom_sheet_play_stop;
+    private ImageButton bottom_sheet_rewind_forward;
+    private ImageButton bottom_sheet_next;
+    private ImageButton bottom_sheet_control_shuffle;
+    private ImageButton bottom_sheet_control_repeat;
+    private ImageButton bottom_sheet_close;
+    private AppCompatSeekBar seek_bar;
+    private ImageButton bottom_sheet_control_volume;
+    //FOR BOTTOM BAR
+    private RelativeLayout bottom_bar_container;
+    private RelativeLayout bottom_bar_open;
+    private RelativeLayout bottom_bar_reveal;
     private RecyclerViewAdapter songAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private ImageView bottom_bar_album_art;
+    private ProgressBar song_progress;
+    private TextView bottom_bar_song_title;
+    private TextView bottom_bar_song_artist;
+    private ImageButton bottom_bar_play_stop;
     //USE TO CONTROL PLAY BACK FOR THE AUDIO FILES
     //TODO: LATER UPDATE THE COMMENT, TO PROPERLY DESCRIBE WHAT IT DOES IN THE CODE
     private MediaPlayer mediaPlayer;
@@ -86,29 +115,37 @@ public class MainActivity extends AppCompatActivity {
     private int songPosition;
     private int rewindLenght = 5;
     private boolean shuffle = false;
-
+    //BUTTOM SHEET VIEW
+    private View bottomSheetFrame;
+    // I DO NOT KNOW WHAT THIS DOES
+    private Timer timer = new Timer();
+    private TimerTask updateTask;
+    //RECYCLER VIEW PARAMETERS
+    private RecyclerView recyclerView;
+    private boolean paused = true;
+    private boolean repeat = false;
+    private boolean muteVolume = false;
     //INSTANCE VARIABLE FOR THE NAVIGATION DRAWER
     private NavigationView navigationView;
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private DrawerLayout drawerLayout;
+    //I THOUGHT I WOULD NEVER USE THIS BUT I ENDED UP USING IT, THIS IS USE TO DESCRIBE HOW THE
+    //BOTTOM SHEET WOULD APPEARS WHEN A USER CLICK ON THE BOTTOM BAR
+    private BottomSheetBehavior bottomSheetBehavior;
 
-    //INSTANCE VARIABLE FOR THE TAB HOST
-    TabHost tabHost;
-    private boolean paused = true;
-    private boolean repeat = false;
 
-    {
-        public int compare (songsQuery a, songsQuery b){
-        return a.getTitle().compareTo(b.getTitle());
-    }
-        }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //HIDE THE ACTION BAR IN THE ACTIVITY
+        getSupportActionBar().hide();
 
-        //GET THE ACTION BAR AND CUSTOMIZE IT
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        getSupportActionBar().setCustomView(R.layout.action_bar_layout);
-        getSupportActionBar().setElevation(30);
+        setContentView(R.layout.activity_main);
+
+        //INSTANTIATE
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -118,75 +155,17 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
-        //GETTING THE INSTANCE OF THE LIST VIEW ID
-        listView = findViewById(R.id.song_list);
-
-        //INSTANTIATE THE  ARRAYLIST
-    songArrayList =new ArrayList<songsQuery>()
-
-    {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                int item = menuItem.getItemId();
-                switch (item) {
-                    case R.id.home:
-                        //Toast.makeText(getApplicationContext(), "Account Click", Toast.LENGTH_SHORT).show();
-                        break;
-
-                    case R.id.albums:
-                        // Toast.makeText(getApplicationContext(), "Setting Click", Toast.LENGTH_SHORT).show();
-                        break;
-
-                    case R.id.songs:
-                        //Toast.makeText(getApplicationContext(), "My cart Click", Toast.LENGTH_SHORT).show();
-                        break;
-
-                    default:
-                        return true;
-                }
-                return true;
-            }
-    }
-
-    //ARRANGE HOW THE SONGS WILL DISPLAY ON THE PHONE BY THE ALPHABETICAL ORDER OF THE TITLE
-        Collections.sort(songArrayList,new Comparator<songsQuery>()
-
-    getSongsFromDevice();)
-
-    setMusicController();
-        listView.setAdapter(songAdapter)
-
-    getSupportActionBar()
-
-    // NAVIGATION DRAWER
-    drawerLayout =
-
-    findViewById(R.id.drawer_layout);
-
-    actionBarDrawerToggle =new
-
-    ActionBarDrawerToggle(this,drawerLayout, R.string.Open, R.string.Close);
-        drawerLayout.addDrawerListener(actionBarDrawerToggle)
-            actionBarDrawerToggle.syncState()
-
-    setDisplayHomeAsUpEnabled(true);.
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        //INSTANTIATE
-        //audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
+        
         initLayout();
 
         songPosition = 0;
         random = new Random(getRandomSeed());
 
+        initBottomSheet();
         setUpRecyclerView();
         initMusicPlayer();
+        checkMute();
+
 
         if (savedInstanceState != null) {
             setRewindLength(savedInstanceState.getInt(CURRENT_REWIND, 10));
@@ -194,6 +173,9 @@ public class MainActivity extends AppCompatActivity {
             setSongPosition(savedInstanceState.getInt(TAG_SONG_ID, 0));
             playSong();
             seek(savedInstanceState.getInt(TAG_POSITION, 0));
+
+            bottom_bar_reveal.setVisibility(View.VISIBLE);
+            bottom_bar_container.setVisibility(View.VISIBLE);
 
             if (savedInstanceState.getBoolean(TAG_PAUSE_STATE, false)) {
                 Handler handler = new Handler();
@@ -207,17 +189,196 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    navigationView =
-
-    findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener()
+    //STILL DONT REALLY KNOW WHAT THIS DOES
+    private long getRandomSeed() {
+        return System.currentTimeMillis();
+    }
 
     private void initLayout() {
-    })
+        // BOTTOM BAR
+        //COORDINATE LAYOUT
+        coordinator_layout = findViewById(R.id.coordinator_layout);
+        //FRAME LAYOUT
+        bottom_bar_reveal = findViewById(R.id.bottom_bar_reveal);
+        //RELATIVE LAYOUT FOR THE BOTTOM SHEET
+        bottom_bar_container = findViewById(R.id.bottom_bar_container);
+        //IMAGE VIEW FOR THE ALBUM ART
+        bottom_bar_album_art = findViewById(R.id.bottom_bar_album_art);
+        //PROGRESS BAR TO SHOW THE SONG SEEK BAR
+        song_progress = findViewById(R.id.song_progress);
+        //SONG TITLE FOR THE BOTTOM BAR
+        bottom_bar_song_title = findViewById(R.id.bottom_bar_song_title);
+        //SONG ARTIST FOR THE BOTTOM BAR
+        bottom_bar_song_artist = findViewById(R.id.bottom_bar_song_artist);
+        //THE RELATIVE LAYOUT TO OPEN THE BOTTOM SHEET FROM THE BOTTOM BAR
+        bottom_bar_open = findViewById(R.id.bottom_bar_open);
+        bottom_bar_open.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bottomSheetFrame.getVisibility() == View.GONE) {
+                    bottomSheetFrame.setVisibility(View.VISIBLE);
+                }
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
 
-    //SETTING UP THE TAB HOST IN THE MAIN ACTIVITY
-        tabHost = findViewById(R.id.tab_host);
-        tabHost.setup()
+        // I DONT REALLY KNOW THAT THIS DOES, I BELIEVE FROM THE DESCRIPTION, IT MEANS TO SHOW WHEN
+        // AN ITEM (SONG) IS CLICKED
+        bottom_bar_song_title.setSelected(true);
+        bottom_bar_song_artist.setSelected(true);
+
+        //GET THE PLAY/PAUSE BUTTON FROM THE XML LAYOUT
+        bottom_bar_play_stop = findViewById(R.id.bottom_bar_play_stop);
+
+        //SET AN ONCLICK LISTENER TO GET
+        bottom_bar_play_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (paused) {
+                    setPauseState(false);
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_play).into(bottom_bar_play_stop);
+                } else {
+                    setPauseState(true);
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_pause).into(bottom_bar_play_stop);
+
+                }
+            }
+        });
+
+        //BOTTOM SHEET
+        //ALBUM COVER ART IMAGE
+        bottom_sheet_album_art = findViewById(R.id.bottom_sheet_album_art);
+        //SONG TITLE
+        bottom_sheet_song_title = findViewById(R.id.bottom_sheet_song_title);
+        //SONG ARTIST
+        bottom_sheet_song_artist = findViewById(R.id.bottom_sheet_song_artist);
+        //SONG TIME DURATION
+        time_stamp_duration = findViewById(R.id.time_stamp_duration);
+        //CURRENT SONG TIME
+        time_stamp_current = findViewById(R.id.time_stamp_current);
+        //SEEK TIME BAR
+        seek_bar = findViewById(R.id.seek_bar);
+        seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    seek(progress);
+                    Log.d(TAG, "onProgressChanged() -> User changed progress" +
+                            "\nProgress: " + progress
+                    );
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        //IMAGE BOTTOM TO CLOSE THE BOTTOM SHEET
+        bottom_sheet_close = findViewById(R.id.bottom_sheet_close);
+        bottom_sheet_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        });
+
+        //PREVIOUS BUTTON
+        bottom_sheet_previous = findViewById(R.id.bottom_sheet_previous);
+        //REWIND BACK BUTTON
+        bottom_sheet_rewind_back = findViewById(R.id.bottom_sheet_rewind_back);
+        //PLAY/PAUSE BUTTON
+        bottom_sheet_play_stop = findViewById(R.id.bottom_sheet_play_stop);
+        //REWIND FORE WARD BUTTON
+        bottom_sheet_rewind_forward = findViewById(R.id.bottom_sheet_rewind_forward);
+        //NEXT BUTTON
+        bottom_sheet_next = findViewById(R.id.bottom_sheet_next);
+
+        bottom_sheet_song_title.setSelected(true);
+        bottom_sheet_song_artist.setSelected(true);
+
+        //DO THIS WHEN THE PREVIOUS BUTTON IS CLICKED
+        bottom_sheet_previous.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPrevious();
+            }
+        });
+        //DO THIS WHEN THE REWIND BACK BUTTON IS CLICKED
+        bottom_sheet_rewind_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rewindBack(rewindLenght);
+            }
+        });
+
+        //DO THIS WHEN THE PLAY/PAUSE BUTTON IS CLICKED
+        bottom_sheet_play_stop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (paused) {
+                    setPauseState(false);
+                } else {
+                    setPauseState(true);
+                }
+            }
+        });
+
+        //DO THIS WHEN THE REWIND FORWARD BUTTON IS CLICKED
+        bottom_sheet_rewind_forward.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rewindForward(rewindLenght);
+            }
+        });
+
+        // DO THIS WHEN THE NEXT BUTTON IS CLICKED
+        bottom_sheet_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            }
+        });
+
+        //DO THIS WHEN THE SHUFFLE BUTTON IS CLICKED
+        bottom_sheet_control_shuffle = findViewById(R.id.bottom_sheet_control_shuffle);
+        bottom_sheet_control_shuffle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleShuffleState();
+            }
+        });
+
+        //DO THIS WHEN THE REPEAT BUTTON IS CLICKED
+        bottom_sheet_control_repeat = findViewById(R.id.bottom_sheet_control_repeat);
+        bottom_sheet_control_repeat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleRepeatState();
+            }
+        });
+
+        bottom_sheet_control_volume = findViewById(R.id.bottom_sheet_control_volume);
+        bottom_sheet_control_volume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!muteVolume) {
+                    muteAudio();
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_volume_off).into(bottom_sheet_control_volume);
+                    muteVolume = true;
+                } else {
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_volume_up).into(bottom_sheet_control_volume);
+                }
+            }
+        });
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -229,241 +390,647 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-        //Tab One
-        tabSpec = tabHost.newTabSpec("tab one").setContent(R.id.tab_1).setIndicator("Songs");
-        tabHost.addTab(tabSpec)
+    private void setPauseState(boolean isPaused) {
+        Log.d(TAG, "setPauseState() -> " + isPaused);
+        if (isPaused) {
+            paused = true;
 
-    //Tab Two
-        tabSpec = tabHost.newTabSpec("tab two").setContent(R.id.tab_2).setIndicator("Albums");
-        tabHost.addTab(tabSpec)
+            //FOR THE BOTTOM SHEET
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_play)
+                    .into(bottom_sheet_play_stop);
 
-}
+            //FOR THE BOTTOM BAR
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_bar_play_stop);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+            makeNotification(R.drawable.ic_pause);
+            pause();
+        } else {
+            paused = false;
 
-        if (actionBarDrawerToggle.onOptionsItemSelected(item)) return true;
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    //INFLATING THE MENU INTO THE ACTION BAR
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        //ADDING THE SEARCH VIEW
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.option_menu, menu);
-
-        //ASSOCIATE THE SEARCHABLE CONFIGURATION WITH THE SEARCHVIEW
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.search_view).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        return true;
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (playIntent == null) {
-            playIntent = new Intent(this, MusicService.class);
-            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
-            startService(playIntent);
+            //BOTTOM SHEET
+            Glide
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_sheet_play_stop);
+            Glide // Bottom Bar
+                    .with(MainActivity.this)
+                    .load(R.drawable.ic_pause)
+                    .into(bottom_bar_play_stop);
+            makeNotification(R.drawable.ic_play);
+            start();
         }
     }
-    private void getSongsFromDevice() {
 
-        //CREATED A CONTENT RESOLVER INSTANCE, TO RETRIEVE THE URI FOR EXTERNAL MUSIC FILES
+    private void initBottomSheet() {
+        // Bottom Sheet Primary
+        bottomSheetFrame = coordinator_layout.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFrame);
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_DRAGGING: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_DRAGGING");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_SETTLING: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_SETTLING");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_EXPANDED: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_EXPANDED");
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.STATE_COLLAPSED: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_COLLAPSED");
+
+                    }
+
+                    case BottomSheetBehavior.STATE_HIDDEN: {
+                        Log.d(TAG, "onStateChanged() -> New State: STATE_HIDDEN");
+
+                        break;
+                    }
+
+                    default: {
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+    }
+
+
+    //I DO NOT KNOW WHAT THIS DOES DOES, I HOPE TO FIND OUT SOON
+    private songsQuery findSongByID(ArrayList<songsQuery> arrayList, long id) {
+        for (songsQuery song : arrayList) {
+            if (song.getId() == id) {
+                return song;
+            }
+        }
+        return songArrayList.get(0);
+    }
+
+    //I FINALLY LEARNT HOW THIS WORKED, WHEN THE USER CLICK THE BACK BOTTON, CHECK ID THE BOTTOM SHEET
+    //IS OPEN AND IF YES, HIDE IT
+    @Override
+    public void onBackPressed() {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private void initMusicPlayer() {
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                //START PLAYBACK : I DON'T REALLY UNDERSTAND WHAT THIS MEAN, I PLAN TO UPDATE IT LATER ON
+                mp.start();
+
+                //NOTIFICATION : I DON'T REALLY UNDERSTAND WHAT THIS MEAN, I PLAN TO UPDATE IT LATER ON
+                makeNotification(R.drawable.default_picture);
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+                //CHECK IF PLAYBACK HAS REACHED THE END OF A TRACK
+                if (repeat) {
+                    playSong();
+                } else {
+                    if (mediaPlayer.getCurrentPosition() > 0) {
+                        mp.reset();
+                        playNext();
+                    }
+                }
+            }
+        });
+
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.e(TAG, "Playback Error: " + extra);
+                mediaPlayer.reset();
+                return true;
+            }
+        });
+    }
+
+    private void makeNotification(int icon) {
+        if (notification != null) {
+            notificationManager.cancel(NOTIFY_ID);
+        }
+
+        Intent notificationIntent = new Intent(MainActivity.this, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent intent = PendingIntent.getActivity(MainActivity.this, 0, notificationIntent, 0);
+
+        Notification.Builder builder = new Notification.Builder(MainActivity.this);
+
+        builder
+                .setSmallIcon(icon)
+                .setTicker(songTitle)
+                .setOngoing(true)
+                .setContentIntent(intent)
+                .setContentTitle("Playing")
+                .setContentText(songTitle);
+
+        notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        notificationManager.notify(NOTIFY_ID, notification);
+    }
+
+    private void setUpRecyclerView() {
+        //GET THE ID OF THE RECYCLER VIEW
+        recyclerView = findViewById(R.id.recycler_view);
+
+        //INSTANTIATE THE RECYCLER VIEW
+        songArrayList = new ArrayList<>();
+
+        layoutManager = new LinearLayoutManager(this);
+        songAdapter = new RecyclerViewAdapter(this, songArrayList);
+
+        recyclerView.setHasFixedSize(false); //TODO CAN STILL SET THIS TO TRUE, IF ANY ERROR ARISES
+        recyclerView.setLayoutManager(layoutManager);
+
+        //I DO NOT KNOW WHAT THIS DOES, UPDATE THIS TO EXPLAIN WHAT IT DOES
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(songAdapter);
+
+
+        songAdapter.setRecyclerViewCallbacks(new RecyclerViewAdapter.RecyclerViewCallbacks() {
+            @Override
+            public void songPicked(int position) {
+                songClicked(position);
+            }
+        });
+
+        //GET/QUERY SONGS AND ALBUM COVER ART FROM THE USER'S DEVICE
+        getSongList();
+
+        //THIS METHOD ARRANGE THE SONGS ALPHABETICALLY BY THEIR TITLES ON THE SCREEN
+        sortSongList();
+    }
+
+    //ARRANGE HOW THE SONGS WILL DISPLAY ON THE PHONE BY THE ALPHABETICAL ORDER OF THE TITLE
+    private void sortSongList() {
+        Collections.sort(songArrayList, new Comparator<songsQuery>() {
+            public int compare(songsQuery a, songsQuery b) {
+                return a.getTitle().compareTo(b.getTitle());
+            }
+        });
+    }
+
+    //TODO THIS IS USED IN THE ACTION BAR, I CAN STILL USE THIS IN A FLOATING BAR TO SHUFFLE SONGS
+    private void shuffleSongList() {
+        Collections.shuffle(songArrayList, new Random(getRandomSeed()));
+        songAdapter.notifyDataSetChanged();
+    }
+
+    private void playSong() {
+
+        mediaPlayer.reset();
+
+        songsQuery playSong = songArrayList.get(getSongPosition());
+
+        songTitle = playSong.getTitle();
+        long currSong = playSong.getId();
+
+        Uri trackUri = ContentUris.withAppendedId(
+                android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                currSong);
+
+        try {
+            mediaPlayer.setDataSource(getApplicationContext(), trackUri);
+        } catch (Exception ex) {
+            Log.e(TAG, "Error setting data source", ex);
+        }
+
+        try {
+            mediaPlayer.prepare();
+        } catch (IOException ex) {
+            Log.e(TAG, "Error setting data source", ex);
+        }
+
+        startUpdateTask(playSong);
+    }
+
+    public void songClicked(int position) {
+        openBottomBar();
+        setSongPosition(position);
+        playSong();
+    }
+
+    private void startUpdateTask(songsQuery song) {
+        setPauseState(false);
+
+        prepareUpdateTask(song);
+
+        if (updateTask != null) {
+            updateTask.cancel();
+        }
+        if (timer != null) {
+            timer.cancel();
+        }
+
+        updateTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            song_progress.setProgress(getCurrentPosition());
+                            seek_bar.setProgress(getCurrentPosition());
+                            time_stamp_current.setText(msToString(getCurrentPosition()));
+
+                            Log.d(TAG, "updateTask -> Current position: " + msToString(getCurrentPosition()));
+                        } catch (Exception ex) {
+                            Log.e(TAG, "updateTask -> ", ex);
+                        }
+                    }
+                });
+            }
+        };
+        timer = new Timer();
+        timer.schedule(updateTask, 0, 1000);
+    }
+
+    private void stopUpdateTask() {
+        if (timer != null)
+            timer.cancel();
+        if (updateTask != null)
+            updateTask.cancel();
+    }
+
+    // I BELIEVE THIS OPEN/SHOW THE BOTTOM SHEET/BAR, THERE WAS AN ANIMATION HERE BUT I DISCARDED IT,
+    //I WILL TRY RO SEE HOW I CAN ACHIEVE THIS MY SELF
+    private void openBottomBar() {
+        if (bottom_bar_reveal.getVisibility() == View.GONE) {
+            bottom_bar_reveal.setVisibility(View.VISIBLE);
+
+            //THIS IS USE TO MAKE THE BOTTOM BAR CONTAINER VISIBLE
+            bottom_bar_container.setVisibility(View.VISIBLE);
+        }
+    }
+
+    //I DO NOT KNOW THAT THIS DOES I HOPE TO RESOLVE/ UNDERSTAND THEM SOON
+    private void prepareUpdateTask(songsQuery song) {
+        Log.d(TAG, "prepareUpdateTask() ->" +
+                "\nArtist: " + song.getArtist() +
+                "\nTitle: " + song.getTitle() +
+                "\nAlbum art Uri: " + song.getImage()
+        );
+
+        //I BELIEVE THIS HAS TO DO WITH THE BOTTOM BAR
+        bottom_bar_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        try {
+            if (song.getImage().equalsIgnoreCase("")) {
+                bottom_bar_album_art.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.default_picture));
+            } else {
+                //***********************SAFE LOADING WITH PICASSO (instead of Glide)***********************//
+                bottom_bar_album_art.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                Picasso
+                        .get()
+                        .load(song.getImage())
+                        .into(bottom_bar_album_art, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                if (bottom_bar_album_art.getDrawable() == null) {
+                                    Log.e(TAG, "prepareUpdateTask() -> onSuccess() -> Drawable is null");
+
+                                    bottom_bar_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                    Picasso
+                                            .get()
+                                            .load(R.drawable.default_picture)
+                                            .into(bottom_bar_album_art);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "prepareUpdateTask() -> onError() -> ");
+
+                                bottom_bar_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                Picasso
+                                        .get()
+                                        .load(R.drawable.default_picture)
+                                        .into(bottom_bar_album_art);
+                            }
+                        });
+                //********************************************************************************************//
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            bottom_bar_album_art.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.default_picture));
+        }
+
+        song_progress.setProgress(0);
+        song_progress.setMax(getDuration());
+
+        //getArtist() DISPLAYS THE FULL NAME OF THE MUSIC WHICH I USE AS THE MUSIC DISPLAY NAME
+        bottom_bar_song_title.setText(song.getArtist());
+
+        //getTitle() DISPLAY THE POSSIBLE ARTIST OF THE MUSIC AND IF NON IS FOUND, IT USES <unknown>
+        bottom_bar_song_artist.setText(song.getTitle());
+
+        //I BELIEVE THIS WILL BE USED WHEN THE NEW ACTIVITY THAT WILL SHOW THE MUSIC PLAY BACK
+        bottom_sheet_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+        try {
+            if (song.getImage().equalsIgnoreCase("")) {
+                bottom_sheet_album_art.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.default_picture));
+
+            } else {
+                //***********************SAFE LOADING WITH PICASSO (instead of Glide)***********************//
+                bottom_sheet_album_art.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                Picasso
+                        .get()
+                        .load(song.getImage())
+                        .into(bottom_sheet_album_art, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                if (bottom_sheet_album_art.getDrawable() == null) {
+                                    Log.e(TAG, "prepareUpdateTask() -> onSuccess() -> Drawable is null");
+
+                                    bottom_sheet_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                    Picasso
+                                            .get()
+                                            .load(R.drawable.default_picture)
+                                            .into(bottom_sheet_album_art);
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "prepareUpdateTask() -> onError() -> ");
+
+                                bottom_sheet_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                Picasso
+                                        .get()
+                                        .load(R.drawable.default_picture)
+                                        .into(bottom_sheet_album_art);
+                            }
+                        });
+                //********************************************************************************************/
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+
+            bottom_sheet_album_art.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.default_picture));
+
+        }
+
+        bottom_sheet_song_title.setText(song.getTitle());
+        bottom_sheet_song_artist.setText(song.getArtist());
+
+        time_stamp_duration.setText(msToString(getDuration()));
+
+        seek_bar.setProgress(0);
+        seek_bar.setMax(getDuration());
+    }
+
+    private void checkMute() {
+        if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0) {
+            bottom_sheet_control_volume.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_off));
+        } else {
+            bottom_sheet_control_volume.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_volume_up));
+        }
+    }
+
+    //QUERY THE USER'S DEVICE TO GET SONGS / ALBUM COVER ART
+    public void getSongList() {
         ContentResolver musicResolver = getContentResolver();
 
-        // QUERY THE AUDIO FILES IN THE DEVICE
         Uri musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
-        //QUERY THE ALBUM FILES IN THE DEVICE (IN OTHER TO GET THE ALBUM ART)
-        Uri albumUri = android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
+        Uri artworkUri = Uri.parse("content://media/external/audio/albumart");
 
-        //CURSOR FOR THE AUDIO FILES
         Cursor musicCursor = musicResolver.query(musicUri, null, null, null, null);
 
-        //CURSOR FOR THE ALBUM FILES (INORDER TO GET THE ALBUM ART)
-        Cursor albumCursor = musicResolver.query(albumUri, null, null, null, null);
-
-        if (musicCursor != null && musicCursor.moveToFirst() && albumCursor != null && albumCursor.moveToFirst()) {
-            int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-            int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
-            int artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-            int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
-            int albumArtColumn = albumCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART);
+        if (musicCursor != null && musicCursor.moveToFirst()) {
+            int titleColumn = musicCursor.getColumnIndex
+                    (MediaStore.Audio.Media.TITLE);
+            int idColumn = musicCursor.getColumnIndex
+                    (MediaStore.Audio.Media._ID);
+            int artistColumn = musicCursor.getColumnIndex
+                    (MediaStore.Audio.Media.ARTIST);
+            int albumIdColumn = musicCursor.getColumnIndex
+                    (MediaStore.Audio.Media.ALBUM_ID);
 
             do {
                 long songId = musicCursor.getLong(idColumn);
                 String songTitle = musicCursor.getString(titleColumn);
                 String songArtist = musicCursor.getString(artistColumn);
-                String songAlbum = musicCursor.getString(albumColumn);
-
-
-                //THIS IS TO CLEAR OFF THE RECENT ALBUM ART
-                String songAlbumArt = "";
+                long songAlbumId = musicCursor.getLong(albumIdColumn);
+                String albumArt = "";
 
                 try {
-                    //GET THE POSITION OF THE SONG
-                    albumCursor.moveToPosition(musicCursor.getPosition());
-
-                    //THEN REPLACE THE ALBUM ART OF SONG
-                    songAlbumArt = albumCursor.getString(albumArtColumn);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    albumArt = (ContentUris.withAppendedId(artworkUri, songAlbumId)).toString();
+                    Log.d(TAG, "TEST Album art: " + albumArt);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
 
-                songArrayList.add(new songsQuery(songId, songTitle, songArtist, songAlbum, songAlbumArt));
+                songArrayList.add(new songsQuery(songId, songTitle, songArtist, albumArt));
             }
             while (musicCursor.moveToNext());
         }
 
-        // CLOSE THE CURSOR TO SAVE PHONE'S RESOURCES
-        if (musicCursor != null) {
+        if (musicCursor != null)
             musicCursor.close();
+    }
+
+    public String msToString(long milliseconds) {
+        String finalTimerString = "";
+        String secondsString = "";
+
+        // Convert total duration into time
+        int hours = (int) (milliseconds / (1000 * 60 * 60));
+        int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
+        int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
+        // Add hours if there
+        if (hours > 0) {
+            finalTimerString = hours + ":";
         }
 
-        if (albumCursor != null) {
-            albumCursor.close();
+        // Prepending 0 to seconds if it is one digit
+        if (seconds < 10) {
+            secondsString = "0" + seconds;
+        } else {
+            secondsString = "" + seconds;
         }
 
+        finalTimerString = finalTimerString + minutes + ":" + secondsString;
+
+        // return timer string
+        return finalTimerString;
     }
 
-    public void songSelected(View view) {
-        musicService.setSong(Integer.parseInt(view.getTag().toString()));
-        musicService.playSong();
-        if (pausePlayBack) {
-            setMusicController();
-            pausePlayBack = false;
-        }
-        musicController.show(0);
-    }
 
-    private void setMusicController() {
-        musicController = new MusicController(this);
-
-        musicController.setPrevNextListeners(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playNextMusic();
-            }
-        }, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playPreviousMusic();
-            }
-        });
-
-        musicController.setMediaPlayer(this);
-        musicController.setAnchorView(findViewById(R.id.song_list));
-        musicController.setEnabled(true);
-    }
-
-    public void playNextMusic() {
-        MusicService MS = new MusicService();
-        MS.playNextMusic();
-        if (pausePlayBack) {
-            setMusicController();
-            pausePlayBack = false;
-        }
-        musicController.show();
-    }
-
-    public void playPreviousMusic() {
-        MusicService MS = new MusicService();
-        MS.playPreviousMusic();
-        if (pausePlayBack) {
-            pausePlayBack = false;
-        }
-        musicController.show();
-    }
-
-    @Override
-    public void start() {
-        musicService.go();
-    }
-
-    @Override
-    public void pause() {
-        pausePlayBack = true;
-        musicService.pauseSong();
-    }
-
-    @Override
-    public int getDuration() {
-        if (musicService != null && musicBound && musicService.isSongPlaying())
-            return musicService.getSongDuration();
-        else
-            return 0;
-    }
-
-    @Override
+    //METHODS FOR INDIVIDUAL PLAY BACK
     public int getCurrentPosition() {
-        if (musicService != null && musicBound && musicService.isSongPlaying())
-            return musicService.getSongPosition();
-        else
-            return 0;
+        return mediaPlayer.getCurrentPosition();
     }
 
-    @Override
-    public void seekTo(int pos) {
-        musicService.seek(pos);
+    private int getSongPosition() {
+        return songPosition;
     }
 
-    @Override
-    public boolean isPlaying() {
-        if (musicService != null && musicBound)
-            return musicService.isSongPlaying();
-        return false;
+    //SET THE SONG
+    private void setSongPosition(int songIndex) {
+        songPosition = songIndex;
     }
 
-    @Override
-    public int getBufferPercentage() {
-        return 0;
+    public void playNext() {
+        if (shuffle) {
+            int newSong = songPosition;
+            while (newSong == songPosition) {
+                newSong = random.nextInt(songArrayList.size());
+            }
+            songPosition = newSong;
+        } else {
+            songPosition++;
+            if (songPosition >= songArrayList.size()) songPosition = 0;
+        }
+
+        playSong();
     }
 
-    @Override
-    public boolean canPause() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return true;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return 0;
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        pause = true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (pause) {
-            setMusicController();
-            pause = false;
+    public void toggleShuffleState() {
+        if (shuffle) {
+            setShuffleOff();
+        } else {
+            setShuffleOn();
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        musicController.hide();
+    public int getRewindLenght() {
+        return rewindLenght;
     }
+
+    public void setRewindLength(int length) {
+        this.rewindLenght = length;
+    }
+
+
+    private void seek(int anInt) {
+        mediaPlayer.seekTo(anInt);
+    }
+
+    public int getDuration() {
+        return mediaPlayer.getDuration();
+    }
+
+    public boolean isPlaying() {
+        return mediaPlayer.isPlaying();
+    }
+
+    public void rewindForward(int interval) {
+        seek(getCurrentPosition() + interval * 1000);
+    }
+
+    public void rewindBack(int interval) {
+        seek(getCurrentPosition() - interval * 1000);
+    }
+
+    public void start() {
+        mediaPlayer.start();
+    }
+
+    public void pause() {
+        mediaPlayer.pause();
+    }
+
+    public void stop() {
+        mediaPlayer.stop();
+    }
+
+    public void playPrevious() {
+        songPosition--;
+        if (songPosition < 0) songPosition = songArrayList.size() - 1;
+        playSong();
+    }
+
+    private void toggleRepeatState() {
+        if (repeat) {
+            setRepeatOff();
+        } else {
+            setRepeatOn();
+        }
+    }
+
+    private void setRepeatOn() {
+        repeat = true;
+
+        bottom_sheet_control_repeat.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_repeat_one));
+    }
+
+    private void setRepeatOff() {
+        repeat = false;
+
+        bottom_sheet_control_repeat.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_repeat));
+    }
+
+    @Override
+    public void onDestroy() {
+        mediaPlayer.stop();
+        mediaPlayer.release();
+
+        stopUpdateTask();
+
+        notificationManager.cancel(NOTIFY_ID);
+
+        super.onDestroy();
+    }
+
+
+    private void setShuffleOn() {
+        shuffle = true;
+
+        bottom_sheet_control_shuffle.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_shuffle));
+    }
+
+    private void setShuffleOff() {
+        shuffle = false;
+
+        bottom_sheet_control_shuffle.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_shuffle_off));
+    }
+
+    public boolean getShuffle() {
+        return shuffle;
+    }
+
+
+    private void muteAudio() {
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+        checkMute();
+    }
+
 }
