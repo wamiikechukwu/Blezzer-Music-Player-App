@@ -8,11 +8,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher_bleezzer"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_bleezzer"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".PlaylistActivity" />
         <activity
             android:name=".SplashScreen"
             android:launchMode="singleTop"
@@ -23,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".SearchResultActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -40,7 +40,6 @@
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
-
             <meta-data
                 android:name="android.app.default_search"
                 android:value=".SearchResultActivity" />

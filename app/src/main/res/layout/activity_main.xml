@@ -5,12 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
+        <Button
+            android:layout_alignParentEnd="true"
+            android:text="@string/playlist"
+            android:id="@+id/playlist_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
         <android.support.v7.widget.RecyclerView
+
+            android:layout_below="@id/playlist_button"
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

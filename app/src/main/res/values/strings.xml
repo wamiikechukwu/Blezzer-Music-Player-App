@@ -16,6 +16,15 @@
     <string name="the_image_of_the_song">the image of the song</string>
     <string name="play_or_pause_button">This is the play/stop button</string>
     <string name="button_to_close_the_bottom_sheet">button to close the bottom sheet</string>
+    <string name="could_not_create_playlist">Could Not Created Playlist</string>
+    <string name="inserted_x_songs_into_playlist_x">Inserted %1$d songs into the playlist %2$s.</string>
+    <string name="created_playlist_x">Created playlist %1$s.</string>
+    <string name="add_playlist">Add Playlist</string>
+    <string name="Show_playlist">show_playlist</string>
+    <string name="show_playlist">Show Playlist</string>
+    <string name="create_playlist">Create Playlist</string>
+    <string name="playlist">Playlists</string>
+    <string name="title_activity_playlist_song">PlaylistSongActivity</string>
 
 
 </resources>

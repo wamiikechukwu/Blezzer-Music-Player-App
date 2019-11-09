@@ -32,6 +32,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -50,6 +51,9 @@ import java.util.Comparator;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import bleezzermusic.bleezzermusicplayer.dialogs.AddPlayListDialogFragment;
+import bleezzermusic.bleezzermusicplayer.models.Playlist;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -132,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
     //I THOUGHT I WOULD NEVER USE THIS BUT I ENDED UP USING IT, THIS IS USE TO DESCRIBE HOW THE
     //BOTTOM SHEET WOULD APPEARS WHEN A USER CLICK ON THE BOTTOM BAR
     private BottomSheetBehavior bottomSheetBehavior;
+
+    private Button playlist;
 
 
     @Override
@@ -378,6 +384,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
+
+        playlist=findViewById(R.id.playlist_button);
+
+        playlist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, PlaylistActivity.class));
+            }
+        });
+
     }
 
     @Override

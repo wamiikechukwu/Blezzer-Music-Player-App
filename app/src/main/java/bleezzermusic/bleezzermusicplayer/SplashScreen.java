@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
+import bleezzermusic.bleezzermusicplayer.utils.Permissions;
+
 public class SplashScreen extends AppCompatActivity {
 
     //TOTAL SECONDS TO DISPLAY THE SPLASH SCREEN
@@ -15,11 +17,14 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         //HIDE THE ACTION BAR FOR THE SPLASH SCREEN
         getSupportActionBar().hide();
 
         //HIDE THE STATUS BAR IN THE PHONE
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        Permissions.requestPermission(this);
 
         setContentView(R.layout.activity_splash_screen);
 
