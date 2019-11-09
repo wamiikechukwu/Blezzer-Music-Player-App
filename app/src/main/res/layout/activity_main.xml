@@ -22,25 +22,24 @@
         android:id="@+id/bottom_bar_reveal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
         android:background="#FF000000"
         android:visibility="gone">
 
         <RelativeLayout
             android:id="@+id/bottom_bar_container"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="68dp"
             android:clickable="true"
             android:visibility="invisible">
 
             <ImageView
                 android:id="@+id/bottom_bar_album_art"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
                 android:layout_alignParentStart="true"
                 android:background="#FF000000"
                 android:contentDescription="@string/the_image_of_the_song"
-                android:scaleType="centerInside"
                 android:src="@drawable/default_picture" />
 
             <ProgressBar
@@ -55,6 +54,7 @@
                 android:id="@+id/bottom_bar_open"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@android:color/transparent"
                 android:layout_below="@id/song_progress"
                 android:gravity="end|center_vertical">
 
@@ -74,28 +74,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/bottom_bar_song_title"
+                android:layout_marginStart="5dp"
                 android:layout_toEndOf="@id/bottom_bar_album_art"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:text="Song artist"
-                android:textColor="#FF000000"
-                android:textSize="12sp" />
+                android:textColor="#FFF"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/bottom_bar_song_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/song_progress"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="5dp"
                 android:layout_toEndOf="@id/bottom_bar_album_art"
                 android:ellipsize="marquee"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:text="Song title"
-                android:textColor="#FF000000"
-                android:textSize="14sp" />
+                android:textColor="#FFF"
+                android:textSize="15.5sp" />
+
 
         </RelativeLayout>
 
@@ -103,6 +107,7 @@
 
     <include
         android:id="@+id/bottom_sheet"
-        layout="@layout/bottom_sheet" />
+        layout="@layout/bottom_sheet"
+        android:visibility="gone" />
 
 </android.support.design.widget.CoordinatorLayout>

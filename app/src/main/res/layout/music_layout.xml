@@ -33,11 +33,4 @@
         android:textColor="#F0000000"
         android:textSize="14.5sp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="69dp"
-        android:layout_toEndOf="@id/circular_image"
-        android:background="#FF0006" />
-
 </RelativeLayout>

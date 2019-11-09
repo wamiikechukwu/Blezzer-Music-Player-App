@@ -1,5 +1,6 @@
 package bleezzermusic.bleezzermusicplayer;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,10 +8,12 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -134,12 +137,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //HIDE THE ACTION BAR IN THE ACTIVITY
+        getSupportActionBar().hide();
+
         setContentView(R.layout.activity_main);
 
         //INSTANTIATE
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                }, 1);
+                return;
+            }
+        }
+        
         initLayout();
 
         songPosition = 0;
@@ -199,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
         bottom_bar_open.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (bottomSheetFrame.getVisibility() == View.GONE) {
+                    bottomSheetFrame.setVisibility(View.VISIBLE);
+                }
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
@@ -208,14 +227,20 @@ public class MainActivity extends AppCompatActivity {
         bottom_bar_song_title.setSelected(true);
         bottom_bar_song_artist.setSelected(true);
 
+        //GET THE PLAY/PAUSE BUTTON FROM THE XML LAYOUT
         bottom_bar_play_stop = findViewById(R.id.bottom_bar_play_stop);
+
+        //SET AN ONCLICK LISTENER TO GET
         bottom_bar_play_stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (paused) {
                     setPauseState(false);
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_play).into(bottom_bar_play_stop);
                 } else {
                     setPauseState(true);
+                    Glide.with(getApplicationContext()).load(R.drawable.ic_pause).into(bottom_bar_play_stop);
+
                 }
             }
         });
@@ -729,8 +754,11 @@ public class MainActivity extends AppCompatActivity {
         song_progress.setProgress(0);
         song_progress.setMax(getDuration());
 
-        bottom_bar_song_title.setText(song.getTitle());
-        bottom_bar_song_artist.setText(song.getArtist());
+        //getArtist() DISPLAYS THE FULL NAME OF THE MUSIC WHICH I USE AS THE MUSIC DISPLAY NAME
+        bottom_bar_song_title.setText(song.getArtist());
+
+        //getTitle() DISPLAY THE POSSIBLE ARTIST OF THE MUSIC AND IF NON IS FOUND, IT USES <unknown>
+        bottom_bar_song_artist.setText(song.getTitle());
 
         //I BELIEVE THIS WILL BE USED WHEN THE NEW ACTIVITY THAT WILL SHOW THE MUSIC PLAY BACK
         bottom_sheet_album_art.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
