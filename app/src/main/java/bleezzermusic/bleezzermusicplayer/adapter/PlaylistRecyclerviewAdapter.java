@@ -50,6 +50,13 @@ public class PlaylistRecyclerviewAdapter extends RecyclerView.Adapter<PlaylistRe
             super(itemView);
             this.playlistName = itemView.findViewById(R.id.playlist_name);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    recyclerViewCallbacks.songPicked(getAdapterPosition());
+                }
+            });
         }
     }
 

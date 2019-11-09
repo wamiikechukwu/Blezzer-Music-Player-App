@@ -17,7 +17,7 @@ import bleezzermusic.bleezzermusicplayer.dialogs.AddPlayListDialogFragment;
 import bleezzermusic.bleezzermusicplayer.loader.PlaylistLoader;
 import bleezzermusic.bleezzermusicplayer.models.Playlist;
 
-public class PlaylistActivity extends AppCompatActivity implements AddPlayListDialogFragment.PlaylistListener {
+public class PlaylistActivity extends AppCompatActivity implements AddPlayListDialogFragment.PlaylistListener, PlaylistRecyclerviewAdapter.RecyclerViewCallbacks {
 
 
     Button createPlaylist;
@@ -34,6 +34,8 @@ public class PlaylistActivity extends AppCompatActivity implements AddPlayListDi
 
         ArrayList<Playlist> allPlaylists = PlaylistLoader.getAllPlaylists(this);
         playlistRecyclerviewAdapter=new PlaylistRecyclerviewAdapter(this,allPlaylists );
+        playlistRecyclerviewAdapter.setRecyclerViewCallbacks(this);
+
         playListRecyclerview.setAdapter(playlistRecyclerviewAdapter);
 
         createPlaylist=findViewById(R.id.create_playlist);
@@ -60,5 +62,10 @@ public class PlaylistActivity extends AppCompatActivity implements AddPlayListDi
     public void onPlaylistCreated() {
         ArrayList<Playlist> allPlaylists = PlaylistLoader.getAllPlaylists(this);
         playlistRecyclerviewAdapter.setPlaylists(allPlaylists);
+    }
+
+    @Override
+    public void songPicked(int position) {
+        Toast.makeText(this, ""+position, Toast.LENGTH_SHORT).show();
     }
 }
